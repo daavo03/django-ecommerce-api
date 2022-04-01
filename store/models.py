@@ -46,3 +46,18 @@ class Order(models.Model):
   #Our fields
   placed_at = models.DateTimeField(auto_now_add=True)
   payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+
+
+# Implementing 1-1 RS within 2 models
+class Address(models.Model):
+  #Assume that every customer should have 1 address, each address should belong to 1 customer
+  street = models.CharField(max_length=255)
+  city = models.CharField(max_length=255)
+  #Specifying the parent in the child class
+  customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True) #When we delete a customer if on_delete on CASCADE the address also deleted, 
+  #if the field accept null values we can use SET_NULL, so when we delete a customer(parent record) the child record it's not going to get delted and
+  #the customer column it's gonna set to null, PROTECT we can prevent the deletion is there's a child associate wit this parent we cannot delete that parent
+  #first we have to delete the child
+  #If we don't set the "primary_key" to True django will create another field ID so every address is gonna have an ID and that means we'll end up
+  #with 1-many RS between customers and addresses, because we can have many addresses with the same customer
+  # We don't have to go to Customers to set the reverse RS, No, django auto creates this for us

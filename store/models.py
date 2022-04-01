@@ -3,6 +3,11 @@ from django.db import models
 
 # We don't have an ID field in any class, because django creates it for us automatically
 
+# New class "Promotion" and define m-m RS to Product. So a product can have different promotions, and a Promotion can apply to different Products
+#We can define the RS in either class
+class Promotion(models.Model):
+  description = models.CharField(max_length=255)
+  discount = models.FloatField()
 class Collection(models.Model):
   title = models.CharField(max_length=255)
 
@@ -15,6 +20,7 @@ class Product(models.Model):
   inventory = models.IntegerField()
   last_update = models.DateTimeField(auto_now=True) #auto_now=True every time we update a product object django auto stores current datetime
   collection = models.ForeignKey(Collection, on_delete=models.PROTECT) #If we delete a collection we don't end up deleting all the products in that collection
+  promotions = models.ManyToManyField(Promotion) #If we wanna change the name of the FK in the Promotion class we can use "related_name='products'"
 
 class Customer(models.Model):
   #We define the values of the choices separately.

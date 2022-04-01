@@ -8,8 +8,13 @@ from django.db import models
 class Promotion(models.Model):
   description = models.CharField(max_length=255)
   discount = models.FloatField()
+
+
+# To implement the other R.S
 class Collection(models.Model):
   title = models.CharField(max_length=255)
+  featured_product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='+') #If we delete a product and that product happens to be the featured product for Collection we want to set it to null
+  #if we don't care about the reverse relationship we can simply type a plus sign. This tells django not to create that reverse RS
 
 # Define a new class and having inherit the Model class in django
 class Product(models.Model):
@@ -19,6 +24,7 @@ class Product(models.Model):
   price = models.DecimalField(max_digits=6, decimal_places=2) #Always use DecimalField() for monetary values
   inventory = models.IntegerField()
   last_update = models.DateTimeField(auto_now=True) #auto_now=True every time we update a product object django auto stores current datetime
+  # Here we have a dependency from the Product class towards the Collection class
   collection = models.ForeignKey(Collection, on_delete=models.PROTECT) #If we delete a collection we don't end up deleting all the products in that collection
   promotions = models.ManyToManyField(Promotion) #If we wanna change the name of the FK in the Promotion class we can use "related_name='products'"
 
@@ -88,6 +94,6 @@ class Cart(models.Model):
   created_at = models.DateTimeField(auto_now_add=True) #This field gets autopopulated when we create a new cart
 
 class CartItem(models.Model):
-  cart = models.ForeignKey(Cart, on_delete=CASCADE) #Here we use CASCADE so if we delete a cart we don't need it anymore we should delete all items auto
-  product = models.ForeignKey(Product, on_delete=CASCADE) #If we can delete a product, if that product has never been order before then that product should be remove from all the existing shopping carts
+  cart = models.ForeignKey(Cart, on_delete=models.CASCADE) #Here we use CASCADE so if we delete a cart we don't need it anymore we should delete all items auto
+  product = models.ForeignKey(Product, on_delete=models.CASCADE) #If we can delete a product, if that product has never been order before then that product should be remove from all the existing shopping carts
   quantity = models.PositiveSmallIntegerField()

@@ -20,8 +20,10 @@ class Collection(models.Model):
 class Product(models.Model):
   # Define the fields of this class
   title = models.CharField(max_length=255)
+  slug = models.SlugField() #default option "default='-'"
   description = models.TextField()
-  price = models.DecimalField(max_digits=6, decimal_places=2) #Always use DecimalField() for monetary values
+  # We change the name from "price" to "unit_price" and run the `python manage.py makemigrations`
+  unit_price = models.DecimalField(max_digits=6, decimal_places=2) #Always use DecimalField() for monetary values
   inventory = models.IntegerField()
   last_update = models.DateTimeField(auto_now=True) #auto_now=True every time we update a product object django auto stores current datetime
   # Here we have a dependency from the Product class towards the Collection class

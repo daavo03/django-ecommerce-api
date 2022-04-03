@@ -1,6 +1,7 @@
-from turtle import title
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
+# Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
+from django.db.models import Q
 from store.models import Product
 
 def say_hello(request):
@@ -71,7 +72,23 @@ def say_hello(request):
 
   # Checking for null
   #To get all the products without a description
-  queryset = Product.objects.filter(description__isnull=True)
+  #queryset = Product.objects.filter(description__isnull=True)
+
+  # Apply multiple filters
+  #Find all products with inventory < 10 AND price < 20
+  #one way pass multiple keyword arguments
+  #queryset = Product.objects.filter(inventory__lt=10, unit_price__lt=20)
+  #Chain the call to filter()
+  #queryset = Product.objects.filter(inventory__lt=10).filter(unit_price__lt=20)
+
+  #Combine conditions using OR operator
+  #We have to use Q objects, using Q class we can encapsulate a keyword argument
+  #queryset = Product.objects.filter(Q(inventory__lt=10) | Q(unit_price__lt=20))
+  #We can also use the AND operator
+  #queryset = Product.objects.filter(Q(inventory__lt=10) & Q(unit_price__lt=20))
+  #Negate a Q object
+  #Get all products whose inventory is less than 10 AND their unit price IS NOT less than 20
+  queryset = Product.objects.filter(Q(inventory__lt=10) & ~Q(unit_price__lt=20))
 
 
 

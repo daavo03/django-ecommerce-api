@@ -80,6 +80,7 @@ class Address(models.Model):
   #Assume that every customer should have 1 address, each address should belong to 1 customer
   street = models.CharField(max_length=255)
   city = models.CharField(max_length=255)
+  zip = models.PositiveIntegerField(null=True)
   #Specifying the parent in the child class
   # Let's assume a customer can have multiple addresses so we change the type of the field to "ForeignKey"
   #so we're telling django that "customer" it's a Foreign Key in this table,

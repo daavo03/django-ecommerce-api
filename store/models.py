@@ -51,6 +51,14 @@ class Customer(models.Model):
   birth_date = models.DateField(null=True) #We don't care about the time they born that's why we use DateField()
   membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE) #Once we have the array we can add the choices option
 
+  # Defining metadata about this model, adding an inner class
+  class Meta:
+    db_table = 'store_customers'
+    # We use them to speed up our querys
+    indexes = [
+      models.Index(fields=['last_name', 'first_name'])
+    ]
+
 class Order(models.Model):
   #Our constants
   PAYMENT_STATUS_PENDING = 'P'

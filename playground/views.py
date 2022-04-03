@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
-from django.db.models import Q
+from django.db.models import Q, F
 from store.models import Product
 
 def say_hello(request):
@@ -88,7 +88,13 @@ def say_hello(request):
   #queryset = Product.objects.filter(Q(inventory__lt=10) & Q(unit_price__lt=20))
   #Negate a Q object
   #Get all products whose inventory is less than 10 AND their unit price IS NOT less than 20
-  queryset = Product.objects.filter(Q(inventory__lt=10) & ~Q(unit_price__lt=20))
+  #queryset = Product.objects.filter(Q(inventory__lt=10) & ~Q(unit_price__lt=20))
+
+  # Filtering data we need to reference a particular field
+  #find all products where the inventory = price
+  #queryset = Product.objects.filter(inventory=F('unit_price')) #WHERE `store_product`.`inventory` = (`store_product`.`unit_price`)
+  #Using f objects we can also reference a field in a related table
+  queryset = Product.objects.filter(inventory=F('collection__id')) # WHERE `store_product`.`inventory` = (`store_product`.`collection_id`)
 
 
 

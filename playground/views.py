@@ -94,11 +94,32 @@ def say_hello(request):
   #find all products where the inventory = price
   #queryset = Product.objects.filter(inventory=F('unit_price')) #WHERE `store_product`.`inventory` = (`store_product`.`unit_price`)
   #Using f objects we can also reference a field in a related table
-  queryset = Product.objects.filter(inventory=F('collection__id')) # WHERE `store_product`.`inventory` = (`store_product`.`collection_id`)
+  #queryset = Product.objects.filter(inventory=F('collection__id')) # WHERE `store_product`.`inventory` = (`store_product`.`collection_id`)
+
+  # Sorting data
+  #Using the order_by() method we can sort the results by 1 or more fields
+  #Getting al the products and sort them by their title in ASC
+  #queryset = Product.objects.order_by('title')
+  # Changing the sort direction
+  #queryset = Product.objects.order_by('-title')
+  # Sort by multiple fields
+  #queryset = Product.objects.order_by('unit_price', '-title')
+  # The order_by returns query_set object and 1 of the methods is reverse, if we call it will reverse the direction of the sort
+  #queryset = Product.objects.order_by('unit_price', '-title').reverse()
+  # We can also call the order_by() after filtering data
+  #queryset = Product.objects.filter(collection__id=1).order_by('unit_price')
+
+  # Sort and pick 1st object 
+  #with this implementation we're not going to get a queryset because we're accessing an individual element
+  #the moment we access an individual element in the queryset, the queryset gets evaluated and then we get an actual object
+  #product = Product.objects.order_by('unit_price')[0]
+  # Rewriting same query
+  #the earliest() method returns an object
+  #product = Product.objects.earliest('unit_price')
+  #similarly we have latest() sorts the products by unit_price in descending order and return the 1st object
+  product = Product.objects.latest('unit_price')
 
 
 
 
-
-
-  return render(request, 'hello.html', { 'name': 'Daniel', 'products': list(queryset) })
+  return render(request, 'hello.html', { 'name': 'Daniel', 'product': product })

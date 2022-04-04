@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
 from django.db.models import Q, F
-from store.models import Product
+from store.models import OrderItem, Product
 
 def say_hello(request):
   # Every model in django has an attribute called ".objects", this return a manager object (interface to DB)
@@ -52,7 +52,7 @@ def say_hello(request):
   #using filter() we need to pass keyword=value
   #queryset = Product.objects.filter(unit_price__gt=20)
 
-  # Find the prodcuts whose price is in a given range
+  # Find the products whose price is in a given range
   #queryset = Product.objects.filter(unit_price__range=(20, 30))
 
   # Filter across relationships
@@ -124,9 +124,68 @@ def say_hello(request):
   #Returning the first 5 objects in this array
   #queryset = Product.objects.all()[:5]
   #Get the products on the 2nd page
-  queryset = Product.objects.all()[5:10]
+  #queryset = Product.objects.all()[5:10]
 
+  # Selecting specific fields
+  #queryset = Product.objects.values('id','title') #SELECT `store_product`.`id`, `store_product`.`title` FROM `store_product
+  #Reading related fields
+  #queryset = Product.objects.values('id','title', 'collection__title')
+  """
+  With this implementation we have an inner join between the Product and the Collection tables because we're
+  reading a related field
 
+  SELECT `store_product`.`id`,
+         `store_product`.`title`,
+         `store_collection`.`title`
+  FROM `store_product`
+  INNER JOIN `store_collection`
+    ON (`store_product`.`collection_id` = `store_collection`.`id`)
+
+  With this method instead of getting a bunch of product instances, we get a bunch of dictionary objects.
+  In the HTML:
+    {'id': 2, 'title': 'Island Oasis - Raspberry', 'collection__title': 'Beauty'}
+    {'id': 3, 'title': 'Shrimp - 21/25, Peel And Deviened', 'collection__title': 'Beauty'}
+    .
+    ..
+    ...
+
+  Each object in the result it's a dictionary
+  """
+  #Method values_list() we get tuples instead of dictionaries
+  #queryset = Product.objects.values_list('id','title', 'collection__title') 
+  """ 
+  (2, 'Island Oasis - Raspberry', 'Beauty') 
+  (3, 'Shrimp - 21/25, Peel And Deviened', 'Beauty')
+  .
+  ..
+  ...
+
+  Each object is a tuple of 3 values
+  """
+  #Selecting products that have been ordered and sorting them by title
+  queryset =  Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
+  """ 
+  We should start with the "OrderItem" table. 
+  So we import the "OrderItem" class at the top
+  Now in this table we need to select all the product ids from this table. Here we use the values() or values_list() method
+  Once we have selected the "product_id" we store the results in a variable "queryset"
+    queryset = OrderItem.objects.values('product_id') # {'product_id': 1}
+
+  To get rid of duplicates we can use the distinct() method
+    queryset = OrderItem.objects.values('product_id').distinct()
+
+  Now we want to go to the Product table and select all products with the ids selected above.
+  So we'll be using the __in lookup type to find all products whose ID is in the given list
+  And we're going to set the expression to the selected product_id from the OrderItem table:
+    Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct())
+  We set it now to the queryset:
+    queryset = Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct())
+
+  Now let's sort the list
+  We'll call the order_by()
+    queryset = Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
+  """
+  
 
 
 

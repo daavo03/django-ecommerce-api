@@ -52,12 +52,12 @@ class Customer(models.Model):
   membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE) #Once we have the array we can add the choices option
 
   # Defining metadata about this model, adding an inner class
-  class Meta:
-    db_table = 'store_customers'
-    # We use them to speed up our querys
-    indexes = [
-      models.Index(fields=['last_name', 'first_name'])
-    ]
+  # class Meta:
+  #   db_table = 'store_customers'
+  #   # We use them to speed up our querys
+  #   indexes = [
+  #     models.Index(fields=['last_name', 'first_name'])
+  #   ]
 
 class Order(models.Model):
   #Our constants
@@ -88,7 +88,7 @@ class Address(models.Model):
   #Assume that every customer should have 1 address, each address should belong to 1 customer
   street = models.CharField(max_length=255)
   city = models.CharField(max_length=255)
-  zip = models.PositiveIntegerField(null=True)
+  # zip = models.PositiveIntegerField(null=True)
   #Specifying the parent in the child class
   # Let's assume a customer can have multiple addresses so we change the type of the field to "ForeignKey"
   #so we're telling django that "customer" it's a Foreign Key in this table,

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
 from django.db.models import Q, F
-from store.models import OrderItem, Product
+from store.models import Order, OrderItem, Product
 
 def say_hello(request):
   # Every model in django has an attribute called ".objects", this return a manager object (interface to DB)
@@ -204,8 +204,119 @@ def say_hello(request):
   #defer() Method we can defer the loading of certain fields to later
   #queryset = Product.objects.defer('description')
 
+  # Preload bunch of objects together - Products with their Collection
+  #queryset = Product.objects.select_related('collection').all()
+  """ 
+  The query of what's happening:
+
+  SELECT `store_product`.`id`,
+         `store_product`.`title`,
+         `store_product`.`slug`,
+         `store_product`.`description`,
+         `store_product`.`unit_price`,
+         `store_product`.`inventory`,
+         `store_product`.`last_update`,
+         `store_product`.`collection_id`,
+         `store_collection`.`id`,
+         `store_collection`.`title`,
+         `store_collection`.`featured_product_id`
+  FROM `store_product`
+  INNER JOIN `store_collection`
+    ON (`store_product`.`collection_id` = `store_collection`.`id`)
+
+  When we use this method django creates a join between our table
+  Also we use it when the other end of the R.S has 1 instances like in this case a product has 1 collection.
+
+  We use prefetch_related() when the other end of the R.S has many objects. An example is the promotions of a product
+  """
+  # Span Relationships
+  #Collection has another field that we want to preload as part of this query
+  #queryset = Product.objects.select_related('collection__someOtherField').all()
+  #Preload promotions
+  #queryset = Product.objects.prefetch_related('promotions').all()
+  """ 
+  Watching the query we have 2 querys:
+
+  SELECT `store_product`.`id`,
+       `store_product`.`title`,
+       `store_product`.`slug`,
+       `store_product`.`description`,
+       `store_product`.`unit_price`,
+       `store_product`.`inventory`,
+       `store_product`.`last_update`,
+       `store_product`.`collection_id`
+  FROM `store_product`
+
+  We have another query to read the promotions of these products.
+
+  SELECT (`store_product_promotions`.`product_id`) AS `_prefetch_related_val_product_id`,
+       `store_promotion`.`id`,
+       `store_promotion`.`description`,
+       `store_promotion`.`discount`
+  FROM `store_promotion`
+  INNER JOIN `store_product_promotions`
+    ON (`store_promotion`.`id` = `store_product_promotions`.`promotion_id`)
+  WHERE `store_product_promotions`.`product_id` IN (1, 2, 3, 4, 5, 6,...,)
+
+  So we're reading 3 columns from the promotion table and we have a join between promotion and product
+
+  Basically we have 2 results set
+  """
+  # We can also combine the 2 methods
+  #We want to load all the products with their promotions and collection
+  #Both of the methods return a queryset, order doesn't matter
+  #queryset = Product.objects.prefetch_related('promotions').select_related('collection').all()
+
+  # Get the last 5 orders with their customers and items (including product referencing each orderitem)
+  """ 
+  We want to get a list of orders. So we should start with the Order class then we go to objects, now we want to
+  preload this orders with their customer, so this is where we call "select_related()" to preload the 'customer' field
+    Order.objects.select_related('customer)
+  
+  Now, we don't show all the orders we wanna show the last 5 orders, so we need to sort them by "placed_at" by desc
+  and then we use array slicing syntax to pick the top 5 orders:
+    Order.objects.select_related('customer).order_by('-placed_at')[:5]
+  """
+  #queryset = Order.objects.select_related('customer').order_by('-placed_at')[:5]
+  """ 
+  Let's look our SQL tab 
+
+  SELECT `store_order`.`id`,
+         `store_order`.`placed_at`,
+         `store_order`.`customer_id`,
+         `store_order`.`payment_status`,
+         `store_customer`.`id`,
+         `store_customer`.`first_name`,
+         `store_customer`.`last_name`,
+         `store_customer`.`email`,
+         `store_customer`.`phone`,
+         `store_customer`.`birth_date`,
+         `store_customer`.`membership`
+  FROM `store_order`
+  INNER JOIN `store_customer`
+    ON (`store_order`.`customer_id` = `store_customer`.`id`)
+  ORDER BY `store_order`.`placed_at` DESC
+  LIMIT 5
+
+  We have a single query to read the orders and their customer. 
+  So we're selecting all the columns from the order table and all the columns from the customer table.
+  THen we have a join between order and customer tables
+
+  Now we should preload the items of these orders.
+  So we call prefetch_related(), because each order can have many items. The name of the field we're gonna query
+  in the Order class we have 3 fields we don't have a field called "items". But look at the "OrderItem" class there
+  we have "order" which is a F.K to "Order" class, so django will create the reverse R.S for us the name of that R.S
+  is "orderitem_set"
+  So we wanna prefetch "orderitem_set":
+    queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set').order_by('-placed_at')[:5]
+  """
+  #queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set').order_by('-placed_at')[:5]
+  """ 
+  Last step is to load the product referrencing each orderItem.
+  """
+  queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
 
 
 
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'products': list(queryset) })
+  return render(request, 'hello.html', { 'name': 'Daniel', 'orders': list(queryset) })

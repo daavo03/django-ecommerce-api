@@ -163,7 +163,7 @@ def say_hello(request):
   Each object is a tuple of 3 values
   """
   #Selecting products that have been ordered and sorting them by title
-  queryset =  Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
+  #queryset =  Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
   """ 
   We should start with the "OrderItem" table. 
   So we import the "OrderItem" class at the top
@@ -186,6 +186,24 @@ def say_hello(request):
     queryset = Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
   """
   
+  # Deferring fields
+  #We have only() method we can specify the fields we want to read from the DB
+  #queryset = Product.objects.only('id', 'title')
+  """ 
+  With the only() method we'll get instances of the product class
+  With the values() method we'll get dictionary objects
+
+  Careful with this method we can end up with a long of queries send to the DB under the hood
+  If we also render the price of each product in the HTML, when we reload the page it take a lot until we see results
+
+  In the SQL tab we have 1003 queries.
+  We have a main query where we read the ID and title from the product table
+  After the main query FOR EACH PRODUCT we have a separate query to read it's price
+  Because we have 1000 products in this list, we have 1000 extra queries for reading the price of all this products
+  """
+  #defer() Method we can defer the loading of certain fields to later
+  #queryset = Product.objects.defer('description')
+
 
 
 

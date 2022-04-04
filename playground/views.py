@@ -117,9 +117,18 @@ def say_hello(request):
   #the earliest() method returns an object
   #product = Product.objects.earliest('unit_price')
   #similarly we have latest() sorts the products by unit_price in descending order and return the 1st object
-  product = Product.objects.latest('unit_price')
+  #product = Product.objects.latest('unit_price')
+
+  # Limiting results
+  #we wanna show 5 products per page, to do that we use python array slicing syntax
+  #Returning the first 5 objects in this array
+  #queryset = Product.objects.all()[:5]
+  #Get the products on the 2nd page
+  queryset = Product.objects.all()[5:10]
 
 
 
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'product': product })
+
+
+  return render(request, 'hello.html', { 'name': 'Daniel', 'products': list(queryset) })

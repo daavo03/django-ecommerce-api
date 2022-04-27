@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
 from django.db.models import Q, F
+# Importing aggregate class
+from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from store.models import Order, OrderItem, Product
 
 def say_hello(request):
@@ -314,9 +316,23 @@ def say_hello(request):
   """ 
   Last step is to load the product referrencing each orderItem.
   """
-  queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
+  #queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
 
+  # Count our Products 
+  #If we use 'id' count total number products, bc every product has an ID. Proper way to count (or using P.K field) 
+  #If we use f.e. 'description' and assuming description can be null. It will count the number of products that have a
+  #description
+  #aggregate() method doesn't return a query set
+  #result = Product.objects.aggregate(Count('id')) #We got a dictionary with one k-v pair: {'id__count': 1000}
 
+  #Changing the name of the key
+  #result = Product.objects.aggregate(count = Count('id')) # {'count': 1000}
 
+  #Calculate multiple summaries. 
+  #The minimum price of our products
+  #result = Product.objects.aggregate(count = Count('id'), min_price = Min('unit_price')) # {'count': 1000, 'min_price': Decimal('1.06')}
+  
+  #We can filter our products in a given collection and then calculate the summaries over that dataset
+  result = Product.objects.filter(collection__id=1).aggregate(count = Count('id'), min_price = Min('unit_price')) 
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'orders': list(queryset) })
+  return render(request, 'hello.html', { 'name': 'Daniel', 'result': result })

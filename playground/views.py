@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
 # Also importing the Value class, Func class
-from django.db.models import Q, F, Value, Func
+from django.db.models import Q, F, Value, Func, ExpressionWrapper
+from django.db.models import DecimalField
 # Importing aggregate class
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 # Importing the concat class
@@ -390,16 +391,31 @@ def say_hello(request):
 
   #Using the Concat class instead of Func class
   #queryset = Customer.objects.annotate(
-  #  full_name = Concat('first_name', Value(' '), 'last_name')
+    #full_name = Concat('first_name', Value(' '), 'last_name')
   #)
 
 
   # Grouping Data
   #See the number of orders each Customer has placed
-  queryset = Customer.objects.annotate(
-    orders_count=Count('order')
-  )
+  #queryset = Customer.objects.annotate(
+    #orders_count=Count('order')
+  #)
 
+
+  # ExpressionWrapper
+  #We gonna annotate our products and give them a new field "discounted_price"
+  #queryset = Product.objects.annotate(
+    #discounted_price = F('unit_price') * 0.8
+  #)
+  """ 
+  In the query above we get an error Expression contains mixed types.
+  We need to import the ExpressionWrapper class from the models module, and wrap our expression inside an
+  expressionwrapper object and that's where we specify the type of the output field
+  """
+  discounted_price = ExpressionWrapper(F('unit_price') * 0.8, output_field=DecimalField())
+  queryset = Product.objects.annotate(
+    discounted_price = discounted_price
+  )
 
 
   return render(request, 'hello.html', { 'name': 'Daniel', 'result': list(queryset) })

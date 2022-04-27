@@ -8,7 +8,10 @@ from django.db.models import DecimalField
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 # Importing the concat class
 from django.db.models.functions import Concat
+# We import the ContentType model to represent the ContentType table we saw
+from django.contrib.contenttypes.models import ContentType
 from store.models import Customer, Order, OrderItem, Product
+from tags.models import TaggedItem
 
 def say_hello(request):
   # Every model in django has an attribute called ".objects", this return a manager object (interface to DB)
@@ -412,10 +415,46 @@ def say_hello(request):
   We need to import the ExpressionWrapper class from the models module, and wrap our expression inside an
   expressionwrapper object and that's where we specify the type of the output field
   """
-  discounted_price = ExpressionWrapper(F('unit_price') * 0.8, output_field=DecimalField())
-  queryset = Product.objects.annotate(
-    discounted_price = discounted_price
+  #discounted_price = ExpressionWrapper(F('unit_price') * 0.8, output_field=DecimalField())
+  #queryset = Product.objects.annotate(
+    #discounted_price = discounted_price
+  #)
+
+
+  # Querying Generic Relationships
+  """ 
+  We have the Tags app with 2 models:
+    - Tag
+    - TaggedItem
+      - We use the ContentType framework to decouple this app from the storeapp
+  
+  This app knows nothing about the store app.
+  
+  In our DB we have a table "django_content_type" in this table we can see ALL the models we have in our application.
+  In the "tags_taggeditem" we have a few column. So to find the tags for a given product:
+    - We have to find the "content_type_id" of the Product model
+      - In my table "django_content_type" the Product model with an id 11
+
+  So we can write a query to filter all records where "content_type_id" equals 11. And "object_id" equals the ID of the
+  product whose tags you wanna find out
+  """
+  #First we need to find the ContentType ID for the Product model
+  #So down here we have the content type instance (the row we saw in the table with ID 11)
+  content_type = ContentType.objects.get_for_model(Product)
+
+  #Filter tagged item
+  #The actual tag is stored in the Tag table we need to preload the "tag_id" field
+  queryset = TaggedItem.objects.select_related('tag').filter(
+    # We are gonna give it 2 filters
+    content_type=content_type,
+    #The object id to the ID of the product whose tags we wanna query
+    object_id=1
   )
+  """ 
+  In the results of the queryset we have 2 querys:
+    1. Finding the Content Type ID for our Product model
+    2. Reading the tags for the given product
+  """
 
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'result': list(queryset) })
+  return render(request, 'hello.html', { 'name': 'Daniel', 'tags': list(queryset) })

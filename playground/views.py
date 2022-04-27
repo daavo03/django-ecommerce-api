@@ -389,8 +389,15 @@ def say_hello(request):
   #)
 
   #Using the Concat class instead of Func class
+  #queryset = Customer.objects.annotate(
+  #  full_name = Concat('first_name', Value(' '), 'last_name')
+  #)
+
+
+  # Grouping Data
+  #See the number of orders each Customer has placed
   queryset = Customer.objects.annotate(
-    full_name = Concat('first_name', Value(' '), 'last_name')
+    orders_count=Count('order')
   )
 
 

@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
-from django.db.models import Q, F
+# Also importing the Value class
+from django.db.models import Q, F, Value
 # Importing aggregate class
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
-from store.models import Order, OrderItem, Product
+from store.models import Customer, Order, OrderItem, Product
 
 def say_hello(request):
   # Every model in django has an attribute called ".objects", this return a manager object (interface to DB)
@@ -66,15 +67,18 @@ def say_hello(request):
   #to perform case insensitive search use "icontains"
   #queryset = Product.objects.filter(title__icontains='coffee')
 
+
   # For dates
   #All products updated in 2021
   #queryset = Product.objects.filter(last_update__year=2021)
   #compare with a date value
   #queryset = Product.objects.filter(last_update__date=2021)
 
+
   # Checking for null
   #To get all the products without a description
   #queryset = Product.objects.filter(description__isnull=True)
+
 
   # Apply multiple filters
   #Find all products with inventory < 10 AND price < 20
@@ -92,11 +96,13 @@ def say_hello(request):
   #Get all products whose inventory is less than 10 AND their unit price IS NOT less than 20
   #queryset = Product.objects.filter(Q(inventory__lt=10) & ~Q(unit_price__lt=20))
 
+
   # Filtering data we need to reference a particular field
   #find all products where the inventory = price
   #queryset = Product.objects.filter(inventory=F('unit_price')) #WHERE `store_product`.`inventory` = (`store_product`.`unit_price`)
   #Using f objects we can also reference a field in a related table
   #queryset = Product.objects.filter(inventory=F('collection__id')) # WHERE `store_product`.`inventory` = (`store_product`.`collection_id`)
+
 
   # Sorting data
   #Using the order_by() method we can sort the results by 1 or more fields
@@ -121,12 +127,14 @@ def say_hello(request):
   #similarly we have latest() sorts the products by unit_price in descending order and return the 1st object
   #product = Product.objects.latest('unit_price')
 
+
   # Limiting results
   #we wanna show 5 products per page, to do that we use python array slicing syntax
   #Returning the first 5 objects in this array
   #queryset = Product.objects.all()[:5]
   #Get the products on the 2nd page
   #queryset = Product.objects.all()[5:10]
+
 
   # Selecting specific fields
   #queryset = Product.objects.values('id','title') #SELECT `store_product`.`id`, `store_product`.`title` FROM `store_product
@@ -188,6 +196,7 @@ def say_hello(request):
     queryset = Product.objects.filter(id__in=OrderItem.objects.values('product_id').distinct()).order_by('title')
   """
   
+
   # Deferring fields
   #We have only() method we can specify the fields we want to read from the DB
   #queryset = Product.objects.only('id', 'title')
@@ -231,6 +240,8 @@ def say_hello(request):
 
   We use prefetch_related() when the other end of the R.S has many objects. An example is the promotions of a product
   """
+
+
   # Span Relationships
   #Collection has another field that we want to preload as part of this query
   #queryset = Product.objects.select_related('collection__someOtherField').all()
@@ -318,6 +329,7 @@ def say_hello(request):
   """
   #queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
 
+
   # Count our Products 
   #If we use 'id' count total number products, bc every product has an ID. Proper way to count (or using P.K field) 
   #If we use f.e. 'description' and assuming description can be null. It will count the number of products that have a
@@ -333,6 +345,37 @@ def say_hello(request):
   #result = Product.objects.aggregate(count = Count('id'), min_price = Min('unit_price')) # {'count': 1000, 'min_price': Decimal('1.06')}
   
   #We can filter our products in a given collection and then calculate the summaries over that dataset
-  result = Product.objects.filter(collection__id=1).aggregate(count = Count('id'), min_price = Min('unit_price')) 
+  #result = Product.objects.filter(collection__id=1).aggregate(count = Count('id'), min_price = Min('unit_price')) 
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'result': result })
+  
+  # Add additional attributes to objects while querying
+  #Let's say while querying customers we wanna give each Customer a new field called "is_new=True"
+  #queryset = Customer.objects.annotate(is_new=True)
+  """ 
+  But we got an error we cannot pass a Boolean value we need to pass an expression object.
+
+  In Django we have the Expression class which is the base class for all types of expressions. Derivaties of this class 
+  are:
+    - Value
+      - Representing single values like a number, boolean, string
+    - F
+      - Reference a field in the same or in other table
+    - Func
+      - Calling database functions
+    - Aggregate
+      - Based class for all aggregate classes Count, Sum, Max, Min, etc
+  """
+  #Passing an Expression Object
+  #queryset = Customer.objects.annotate(is_new=Value(True)) #In the list of Customers we got new column "IS_NEW" set to 1
+
+  #Giving our Customers new field called "new_id" set it to the same value as the ID field.
+  #So we need to reference another field in this model
+  #queryset = Customer.objects.annotate(new_id=F('id'))
+
+  #Also perform computations
+  #Add +1 to the NEW_ID
+  queryset = Customer.objects.annotate(new_id=F('id') + 1)
+
+
+
+  return render(request, 'hello.html', { 'name': 'Daniel', 'result': list(queryset) })

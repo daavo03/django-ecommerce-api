@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 # Q is short for Query, using this class we can represent a query expression or a piece of code produces a value
-# Also importing the Value class
-from django.db.models import Q, F, Value
+# Also importing the Value class, Func class
+from django.db.models import Q, F, Value, Func
 # Importing aggregate class
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
+# Importing the concat class
+from django.db.models.functions import Concat
 from store.models import Customer, Order, OrderItem, Product
 
 def say_hello(request):
@@ -374,7 +376,22 @@ def say_hello(request):
 
   #Also perform computations
   #Add +1 to the NEW_ID
-  queryset = Customer.objects.annotate(new_id=F('id') + 1)
+  #queryset = Customer.objects.annotate(new_id=F('id') + 1)
+
+
+  # Calling a Database Function
+  #queryset = Customer.objects.annotate(
+    # Here we call the CONCAT function of a DB engine
+    #New field to our customers, first name and last name. We reference fields using F objects
+    #Then we need to give this a keyword argument that specifies the target function. So we set "function" to 'CONCAT'
+    #Next we need to add a space in between
+    #full_name = Func(F('first_name'), Value(' '), F('last_name'), function='CONCAT')
+  #)
+
+  #Using the Concat class instead of Func class
+  queryset = Customer.objects.annotate(
+    full_name = Concat('first_name', Value(' '), 'last_name')
+  )
 
 
 

@@ -440,21 +440,25 @@ def say_hello(request):
   """
   #First we need to find the ContentType ID for the Product model
   #So down here we have the content type instance (the row we saw in the table with ID 11)
-  content_type = ContentType.objects.get_for_model(Product)
+  #content_type = ContentType.objects.get_for_model(Product)
 
   #Filter tagged item
   #The actual tag is stored in the Tag table we need to preload the "tag_id" field
-  queryset = TaggedItem.objects.select_related('tag').filter(
+  #queryset = TaggedItem.objects.select_related('tag').filter(
     # We are gonna give it 2 filters
-    content_type=content_type,
+    #content_type=content_type,
     #The object id to the ID of the product whose tags we wanna query
-    object_id=1
-  )
+    #object_id=1
+  #)
   """ 
   In the results of the queryset we have 2 querys:
     1. Finding the Content Type ID for our Product model
     2. Reading the tags for the given product
   """
 
+
+  # Custom Managers
+  #Using new method to get the Tags for a given object
+  TaggedItem.objects.get_tags_for(Product, 1)
 
   return render(request, 'hello.html', { 'name': 'Daniel', 'tags': list(queryset) })

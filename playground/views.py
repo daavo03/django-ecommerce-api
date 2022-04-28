@@ -10,7 +10,7 @@ from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.db.models.functions import Concat
 # We import the ContentType model to represent the ContentType table we saw
 from django.contrib.contenttypes.models import ContentType
-from store.models import Customer, Order, OrderItem, Product
+from store.models import Customer, Order, OrderItem, Product, Collection
 from tags.models import TaggedItem
 
 def say_hello(request):
@@ -463,9 +463,9 @@ def say_hello(request):
 
 
   # Caching mechanism build into querysets
-  queryset = Product.objects.all()
+  #queryset = Product.objects.all()
   #Converting the queryset to a list
-  list(queryset)
+  #list(queryset)
   """ 
   When we convert the queryset to a list Django evaluate the queryset and that's when it's go to the DB to get the
   result. This is expensive.
@@ -479,4 +479,18 @@ def say_hello(request):
     Caching happens only if it evaluated the entire queryset first. 
   """
 
-  return render(request, 'hello.html', { 'name': 'Daniel', 'tags': list(queryset) })
+
+  # Inserting a record in DB
+  #Create a collection object
+  collection = Collection()
+  collection.title = 'Video Games'
+  collection.featured_product = Product(pk=1)
+
+  #To insert this Collection to our DB using save() method
+  #In this case because we haven't set the ID of this collection Django will treat this as an insert operation
+  collection.save()
+
+  #Another way
+  #collection = Collection.objects.create(name='a', featured_product_id=1)
+
+  return render(request, 'hello.html', { 'name': 'Daniel' })

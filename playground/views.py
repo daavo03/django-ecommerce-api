@@ -482,15 +482,49 @@ def say_hello(request):
 
   # Inserting a record in DB
   #Create a collection object
-  collection = Collection()
-  collection.title = 'Video Games'
-  collection.featured_product = Product(pk=1)
+  # collection = Collection()
+  # collection.title = 'Video Games'
+  # collection.featured_product = Product(pk=1)
 
-  #To insert this Collection to our DB using save() method
-  #In this case because we haven't set the ID of this collection Django will treat this as an insert operation
-  collection.save()
+  # #To insert this Collection to our DB using save() method
+  # #In this case because we haven't set the ID of this collection Django will treat this as an insert operation
+  # collection.save()
 
   #Another way
   #collection = Collection.objects.create(name='a', featured_product_id=1)
+
+
+
+  # Updating objects
+  #collection = Collection(pk=11)
+  #collection.title = 'Games'
+  #collection.featured_product = None
+
+  #collection.save()
+
+  #We only want to update the feature product for this collection
+  #collection = Collection(pk=11)
+  #collection.featured_product = None
+
+  #collection.save()
+  """ 
+  Django is setting the title of the Collection to an empty string
+  The collection object we have in memory by default it's title is set to an empty string. So even if it don't
+  explicitly update this field Django is gonna included in our SQL statement.
+
+  To properly update object in Django applications first we have to read it from the DB so we have all the values
+  in memory then we can update it
+  """
+  #collection = Collection.objects.get(pk=12)
+  #collection.featured_product = None
+  #collection.save()
+
+  #Avoiding the extra read
+  #This update method will update the field for all objects in our queryset
+  #Collection.objects.update(featured_product=None)
+
+  # Targeting a particular collection
+  Collection.objects.filter(pk=11).update(featured_product=None)
+
 
   return render(request, 'hello.html', { 'name': 'Daniel' })

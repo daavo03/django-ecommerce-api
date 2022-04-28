@@ -459,6 +459,24 @@ def say_hello(request):
 
   # Custom Managers
   #Using new method to get the Tags for a given object
-  TaggedItem.objects.get_tags_for(Product, 1)
+  #TaggedItem.objects.get_tags_for(Product, 1)
+
+
+  # Caching mechanism build into querysets
+  queryset = Product.objects.all()
+  #Converting the queryset to a list
+  list(queryset)
+  """ 
+  When we convert the queryset to a list Django evaluate the queryset and that's when it's go to the DB to get the
+  result. This is expensive.
+
+  When Django evaluates the query and gets data from DB is gonna stored it in the QuerySet Cache. The second time
+  we convert the queryset to a list Django read the result from the QuerySet Cache.
+
+  Same happens if we access an individual element from the QuerySet. Django reads this object from the QuerySet Cache.
+
+  Note.
+    Caching happens only if it evaluated the entire queryset first. 
+  """
 
   return render(request, 'hello.html', { 'name': 'Daniel', 'tags': list(queryset) })

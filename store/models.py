@@ -73,6 +73,12 @@ class Customer(models.Model):
   #     models.Index(fields=['last_name', 'first_name'])
   #   ]
 
+  def __str__(self) -> str:
+      return f'{self.first_name} {self.last_name}'
+
+  class Meta:
+    ordering = ['first_name', 'last_name']
+
 class Order(models.Model):
   #Our constants
   PAYMENT_STATUS_PENDING = 'P'

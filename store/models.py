@@ -16,6 +16,14 @@ class Collection(models.Model):
   featured_product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='+') #If we delete a product and that product happens to be the featured product for Collection we want to set it to null
   #if we don't care about the reverse relationship we can simply type a plus sign. This tells django not to create that reverse RS
 
+  # We change the string representation of an object in Python, overwriting the __str__ method 
+  def __str__(self) -> str:
+      return self.title
+
+  # Defining Meta class to order our Collection
+  class Meta:
+    ordering = ['title']
+
 # Define a new class and having inherit the Model class in django
 class Product(models.Model):
   # Define the fields of this class
@@ -29,6 +37,12 @@ class Product(models.Model):
   # Here we have a dependency from the Product class towards the Collection class
   collection = models.ForeignKey(Collection, on_delete=models.PROTECT) #If we delete a collection we don't end up deleting all the products in that collection
   promotions = models.ManyToManyField(Promotion) #If we wanna change the name of the FK in the Promotion class we can use "related_name='products'"
+
+  def __str__(self) -> str:
+      return self.title
+
+  class Meta:
+    ordering = ['title']
 
 class Customer(models.Model):
   #We define the values of the choices separately.

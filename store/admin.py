@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from . import models
 
 # Using the register decorator on this class
@@ -43,4 +44,19 @@ class OrderAdmin(admin.ModelAdmin):
   list_display = ['id', 'placed_at', 'customer']
 
 # Registering the models for the admin site
-admin.site.register(models.Collection)
+@admin.register(models.Collection)
+class CollectionAdmin(admin.ModelAdmin):
+  list_display = ['title', 'products_count']
+
+  # Defining a method to treat the computed field
+  @admin.display(ordering='products_count')
+  def products_count(self, collection):
+    # Our collection object don't have a field "products_count"
+    return collection.products_count
+
+  # So we need to overwrite the queryset on this page
+  #Every ModelAdmin has a method called "get_queryset"
+  def get_queryset(self, request):
+      return super().get_queryset(request).annotate(
+        products_count=Count('product')
+      )

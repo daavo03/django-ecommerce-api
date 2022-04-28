@@ -9,11 +9,18 @@ from . import models
 class ProductAdmin(admin.ModelAdmin):
   # Set a bunch of attributes to customize the list page
   #We got a new column where we can see the price of each Product
-  list_display = ['title', 'unit_price']
+  list_display = ['title', 'unit_price', 'inventory_status']
   # Fields that can be edited on the list page
   list_editable = ['unit_price']
   # Get 10 Products per page
   list_per_page = 10
+
+  # To implement sorting we apply the admin display decorator to the method
+  @admin.display(ordering='inventory')
+  def inventory_status(self, product):
+    if product.inventory < 10:
+      return 'Low'
+    return 'Ok'
 
 
 @admin.register(models.Customer)

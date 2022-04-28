@@ -524,7 +524,15 @@ def say_hello(request):
   #Collection.objects.update(featured_product=None)
 
   # Targeting a particular collection
-  Collection.objects.filter(pk=11).update(featured_product=None)
+  #Collection.objects.filter(pk=11).update(featured_product=None)
+
+
+
+  # Deleting an Object
+  collection = Collection(pk=11)
+  collection.delete()
+  #Deleting multiple objects
+  Collection.objects.filter(id__gt=5).delete()
 
 
   return render(request, 'hello.html', { 'name': 'Daniel' })

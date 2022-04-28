@@ -10,8 +10,10 @@ from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.db.models.functions import Concat
 # We import the ContentType model to represent the ContentType table we saw
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from store.models import Customer, Order, OrderItem, Product, Collection
 from tags.models import TaggedItem
+
 
 def say_hello(request):
   # Every model in django has an attribute called ".objects", this return a manager object (interface to DB)
@@ -529,10 +531,26 @@ def say_hello(request):
 
 
   # Deleting an Object
-  collection = Collection(pk=11)
-  collection.delete()
+  #collection = Collection(pk=11)
+  #collection.delete()
   #Deleting multiple objects
-  Collection.objects.filter(id__gt=5).delete()
+  #Collection.objects.filter(id__gt=5).delete()
 
+
+
+  # Transactions
+  #Saving an order with his items
+  with transaction.atomic():
+    order = Order()
+    order.customer_id = 1
+    order.save()
+
+    item = OrderItem()
+    item.order = order
+    # Here making the transaction fail
+    item.product_id = -1
+    item.quantity = 1
+    item.unit_price = 10
+    item.save()
 
   return render(request, 'hello.html', { 'name': 'Daniel' })

@@ -58,6 +58,7 @@ class ProductAdmin(admin.ModelAdmin):
   list_filter = ['collection', 'last_update', InventoryFilter]
   # Get 10 Products per page
   list_per_page = 10
+  search_fields = ['title']
 
   # To implement sorting we apply the admin display decorator to the method
   @admin.display(ordering='inventory')
@@ -115,10 +116,23 @@ class CustomerAdmin(admin.ModelAdmin):
       )
 
 
+# We also can use StackedInLine in which each item will be represented as a separated form
+class OrderItemInLine(admin.TabularInline):
+  autocomplete_fields = ['product']
+  model = models.OrderItem
+  # Don't see the placeholders
+  extra = 0
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
-  list_display = ['id', 'placed_at', 'customer']
   autocomplete_fields = ['customer']
+  # Setting min and max number of items for order
+  min_num = 1
+  max_num = 10
+  # Adding the OrderItemInLine class as an inline
+  inlines = [OrderItemInLine]
+  list_display = ['id', 'placed_at', 'customer']
 
 # Registering the models for the admin site
 @admin.register(models.Collection)

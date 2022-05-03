@@ -4,6 +4,29 @@ from django.utils.html import format_html, urlencode
 from django.urls import reverse
 from . import models
 
+
+# Creating our own custom filters
+class InventoryFilter(admin.SimpleListFilter):
+  # Setting attributes
+  title = 'inventory'
+  parameter_name = 'inventory'
+
+  # 2 methods to implement here
+  #lookups we can specify what items should appear in the list
+  def lookups(self, request, model_admin):
+      return [
+        # Each tuple represents 1 of the filters in the list
+        #In each should have 2 values: actual value for filter, human readable descrip
+        ('<10', 'Low')
+      ]
+
+  #queryset implementing filtering logic
+  def queryset(self, request, queryset):
+      # This returns the selected filter
+      if self.value() == '<10':
+        return queryset.filter(inventory__lt=10)
+
+
 # Using the register decorator on this class
 #With this we're saying that this class above is the Admin Model for the Product class, now we don't need the last
 #line anymore
@@ -15,6 +38,9 @@ class ProductAdmin(admin.ModelAdmin):
   list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
   # Fields that can be edited on the list page
   list_editable = ['unit_price']
+  # Filtering the products
+  #To use our custom filter we type the name of the class in this list
+  list_filter = ['collection', 'last_update', InventoryFilter]
   # Get 10 Products per page
   list_per_page = 10
 

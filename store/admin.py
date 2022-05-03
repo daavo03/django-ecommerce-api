@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models.aggregates import Count
 from django.utils.html import format_html, urlencode
 from django.urls import reverse
@@ -33,6 +33,8 @@ class InventoryFilter(admin.SimpleListFilter):
 @admin.register(models.Product)
 # How we wanna view or edit our model(in this case Products)
 class ProductAdmin(admin.ModelAdmin):
+  # To show the list of actions to the user
+  actions = ['clear_inventory']
   # Set a bunch of attributes to customize the list page
   #We got a new column where we can see the price of each Product
   list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
@@ -50,6 +52,22 @@ class ProductAdmin(admin.ModelAdmin):
     if product.inventory < 10:
       return 'Low'
     return 'Ok'
+
+  # Creating a custom action
+  #The description is the text to appear in the dropdown list
+  @admin.action(description='Clear inventory')
+  def clear_inventory(self, request, queryset):
+    # This will update DB and return the number of updated records
+    updated_count = queryset.update(inventory=0)
+    # Show a msg to the user
+    self.message_user(
+      # First argument request object
+      request,
+      # Message show to the user
+      f'{updated_count} products were successfully updated.',
+      # To select the type of message
+      #messages.ERROR
+    )
   
   # We set this to the list of fields we want to eagerload
   list_select_related = ['collection']

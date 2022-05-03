@@ -1,4 +1,4 @@
-from tkinter import CASCADE
+from django.core.validators import MinValueValidator
 from django.db import models
 
 # We don't have an ID field in any class, because django creates it for us automatically
@@ -29,14 +29,18 @@ class Product(models.Model):
   # Define the fields of this class
   title = models.CharField(max_length=255)
   slug = models.SlugField() #default option "default='-'"
-  description = models.TextField()
+  # null only applies to our DB, blank used to optional in our admin interface
+  description = models.TextField(null=True, blank=True)
   # We change the name from "price" to "unit_price" and run the `python manage.py makemigrations`
-  unit_price = models.DecimalField(max_digits=6, decimal_places=2) #Always use DecimalField() for monetary values
-  inventory = models.IntegerField()
+  unit_price = models.DecimalField(
+    max_digits=6, 
+    decimal_places=2,
+    validators=[MinValueValidator(1)]) #Always use DecimalField() for monetary values
+  inventory = models.IntegerField(validators=[MinValueValidator(0)])
   last_update = models.DateTimeField(auto_now=True) #auto_now=True every time we update a product object django auto stores current datetime
   # Here we have a dependency from the Product class towards the Collection class
   collection = models.ForeignKey(Collection, on_delete=models.PROTECT) #If we delete a collection we don't end up deleting all the products in that collection
-  promotions = models.ManyToManyField(Promotion) #If we wanna change the name of the FK in the Promotion class we can use "related_name='products'"
+  promotions = models.ManyToManyField(Promotion, blank=True) #If we wanna change the name of the FK in the Promotion class we can use "related_name='products'"
 
   def __str__(self) -> str:
       return self.title

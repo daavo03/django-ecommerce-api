@@ -33,6 +33,19 @@ class InventoryFilter(admin.SimpleListFilter):
 @admin.register(models.Product)
 # How we wanna view or edit our model(in this case Products)
 class ProductAdmin(admin.ModelAdmin):
+  # Customizing the forms
+  #Selecting the fields to show in the form
+  #fields = ['title', 'slug']
+  #Excluding certain fields
+  #exclude = ['promotions']
+  #We also have readonly fields
+  #readonly_fields = ['title']
+  #Autocompleting fields
+  autocomplete_fields = ['collection']
+  #Specifying how each field in the form can get prepopulated
+  prepopulated_fields = {
+    'slug': ['title']
+  }
   # To show the list of actions to the user
   actions = ['clear_inventory']
   # Set a bunch of attributes to customize the list page
@@ -105,11 +118,14 @@ class CustomerAdmin(admin.ModelAdmin):
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
   list_display = ['id', 'placed_at', 'customer']
+  autocomplete_fields = ['customer']
 
 # Registering the models for the admin site
 @admin.register(models.Collection)
 class CollectionAdmin(admin.ModelAdmin):
   list_display = ['title', 'products_count']
+  # Adding the attribute for searching collections in the Products
+  search_fields = ['title']
 
   # Defining a method to treat the computed field
   @admin.display(ordering='products_count')

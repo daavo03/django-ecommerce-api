@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'playground',
     'debug_toolbar',
     'store',
+    # Registering the new app
+    'store_custom',
     'tags',
     'likes',
 ]

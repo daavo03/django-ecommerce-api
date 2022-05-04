@@ -1,10 +1,7 @@
 from django.contrib import admin, messages
-from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db.models.aggregates import Count
 from django.utils.html import format_html, urlencode
 from django.urls import reverse
-
-from tags.models import TaggedItem
 from . import models
 
 
@@ -30,13 +27,6 @@ class InventoryFilter(admin.SimpleListFilter):
         return queryset.filter(inventory__lt=10)
 
 
-# Managing the Tags on our Product form
-#Creating inline class for managing a tag
-class TagInline(GenericTabularInline):
-  # Changing the tags in the form to autocomplete
-  autocomplete_fields = ['tag']
-  model = TaggedItem
-
 # Using the register decorator on this class
 #With this we're saying that this class above is the Admin Model for the Product class, now we don't need the last
 #line anymore
@@ -58,7 +48,6 @@ class ProductAdmin(admin.ModelAdmin):
   }
   # To show the list of actions to the user
   actions = ['clear_inventory']
-  inlines = [TagInline]
   # Set a bunch of attributes to customize the list page
   #We got a new column where we can see the price of each Product
   list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']

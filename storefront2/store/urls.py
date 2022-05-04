@@ -8,5 +8,8 @@ urlpatterns = [
     path('products/', views.product_list),
     # Adding a parameter
     #Applying a converter to this parameter
-    path('products/<int:id>/', views.product_detail)
+    path('products/<int:id>/', views.product_detail),
+    # We can give this mapping a name which is used in the serializer argument "view_name"
+    #also changing the parameter to pk
+    path('collections/<int:pk>/', views.collection_detail, name='collection-detail'),
 ]

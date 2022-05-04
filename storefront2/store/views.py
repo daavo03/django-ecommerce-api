@@ -9,10 +9,12 @@ from .serializers import ProductSerializer
 # Here we should create a view function (take a request returns a response)
 def product_list(request):
   # Getting all Products
-  queryset = Product.objects.all()
+  # Loading Products and their Collections together using "select_related()"
+  queryset = Product.objects.select_related('collection').all()
   # Giving the serializer a queryset, the "many=True" to knows it should iterate over this queryset and convert each
   #product object to a dictionary
-  serializer = ProductSerializer(queryset, many=True)
+  # We need to pass our request object to our serializer
+  serializer = ProductSerializer(queryset, many=True, context={'request': request})
   # Here we return a response object
   return Response(serializer.data)
 
@@ -45,3 +47,10 @@ def product_detail(request, id):
   # We give this Serializer a product object
   serializer = ProductSerializer(product)
   return Response(serializer.data)
+
+
+# Creating the view for collection_detail
+@api_view()
+#Changing the id for pk as well 
+def collection_detail(request, pk):
+  return Response('ok')

@@ -23,8 +23,10 @@ def product_list(request):
     # Here the deserialization happens
     #To deserialize data we have to set the "data=" to request.data
     serializer = ProductSerializer(data=request.data)
+    # If there's invalid data django restframework is automatic return response with 400 status including validation errors
+    serializer.is_valid(raise_exception=True)
     #Data available in serializer.validated_data, but first we need to validate the data
-    # serializer.validated_data
+    serializer.validated_data
     return Response('ok')
 
 """  

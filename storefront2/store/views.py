@@ -5,18 +5,27 @@ from rest_framework import status
 from .models import Product
 from .serializers import ProductSerializer
 
-@api_view()
+# Passing an array of strings that specify the HTTP methods we support at this method
+@api_view(['GET', 'POST'])
 # Here we should create a view function (take a request returns a response)
 def product_list(request):
-  # Getting all Products
-  # Loading Products and their Collections together using "select_related()"
-  queryset = Product.objects.select_related('collection').all()
-  # Giving the serializer a queryset, the "many=True" to knows it should iterate over this queryset and convert each
-  #product object to a dictionary
-  # We need to pass our request object to our serializer
-  serializer = ProductSerializer(queryset, many=True, context={'request': request})
-  # Here we return a response object
-  return Response(serializer.data)
+  if request.method == 'GET':
+    # Getting all Products
+    # Loading Products and their Collections together using "select_related()"
+    queryset = Product.objects.select_related('collection').all()
+    # Giving the serializer a queryset, the "many=True" to knows it should iterate over this queryset and convert each
+    #product object to a dictionary
+    # We need to pass our request object to our serializer
+    serializer = ProductSerializer(queryset, many=True, context={'request': request})
+    # Here we return a response object
+    return Response(serializer.data)
+  elif request.method == 'POST':
+    # Here the deserialization happens
+    #To deserialize data we have to set the "data=" to request.data
+    serializer = ProductSerializer(data=request.data)
+    #Data available in serializer.validated_data, but first we need to validate the data
+    # serializer.validated_data
+    return Response('ok')
 
 """  
 # Create another view function for seeing details of a product

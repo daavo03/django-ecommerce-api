@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Adding django REST framework
+    'rest_framework',
     'playground',
     'debug_toolbar',
     'store',

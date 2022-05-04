@@ -25,9 +25,9 @@ def product_list(request):
     serializer = ProductSerializer(data=request.data)
     # If there's invalid data django restframework is automatic return response with 400 status including validation errors
     serializer.is_valid(raise_exception=True)
-    #Data available in serializer.validated_data, but first we need to validate the data
-    serializer.validated_data
-    return Response('ok')
+    # The save() method has some logic for extracting data from the dictionary to create/update a product
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 """  
 # Create another view function for seeing details of a product
@@ -51,13 +51,23 @@ def product_detail(request, id):
     return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
-@api_view()
+# Updating a product
+@api_view(['GET', 'PUT'])
 def product_detail(request, id):
   # Using our shortcut function
   product = get_object_or_404(Product, pk=id)
-  # We give this Serializer a product object
-  serializer = ProductSerializer(product)
-  return Response(serializer.data)
+  # Checking the request method
+  if request.method == 'GET':
+    # We give this Serializer a product object
+    serializer = ProductSerializer(product)
+    return Response(serializer.data)
+  elif request.method == 'PUT':
+    # Deserializing and also passing a product instance
+    serializer = ProductSerializer(product, data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
+
 
 
 # Creating the view for collection_detail

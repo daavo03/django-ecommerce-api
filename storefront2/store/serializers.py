@@ -19,7 +19,7 @@ class ProductSerializer(serializers.ModelSerializer):
     model = Product
     # An array or tuple of the fields to include
     #Including a field does not exist, we add it and define it below
-    fields = ['id', 'title', 'unit_price', 'price_with_tax', 'collection']
+    fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection']
 
   price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
 
@@ -52,3 +52,18 @@ class ProductSerializer(serializers.ModelSerializer):
   #Defining the method
   def calculate_tax(self, product: Product):
     return product.unit_price * Decimal(1.1)
+
+  #The save() method will call one of these methods depending on the state of the serializer
+  #Overwriting how a product is created
+  # def create(self, validated_data):
+  #     # Create a "product" object and unpacking the dictionary
+  #     product = Product(**validated_data)
+  #     product.other = 1
+  #     product.save()
+  #     return product
+
+  # #Overwriting how a product is updated
+  # def update(self, instance, validated_data):
+  #     instance.unit_price = validated_data.get('unit_price')
+  #     instance.save()
+  #     return instance

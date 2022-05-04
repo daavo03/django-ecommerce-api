@@ -23,5 +23,8 @@ admin.site.index_title = 'Admin'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('playground/', include('playground.urls')),
+    # Importing the url in the main urls module
+    #If the URL request starts with "store" if should be handle by "store.urls" module
+    path('store/', include('store.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

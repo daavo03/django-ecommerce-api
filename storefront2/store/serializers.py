@@ -1,6 +1,8 @@
 # A Serializer convers a model instance to a dictionary
 
+from decimal import Decimal
 from rest_framework import serializers
+from store.models import Product
 
 class ProductSerializer(serializers.Serializer):
   # Deciding what fields of the Product class we wanna serialize
@@ -8,5 +10,11 @@ class ProductSerializer(serializers.Serializer):
   id = serializers.IntegerField()
   #Later we use this serializer when receiving data
   title = serializers.CharField(max_length=255)
-  #We can name them whatever, it's completely separate object from the Product object
-  unit_price = serializers.DecimalField(max_digits=6, decimal_places=2)
+  #We can name them whatever, it's completely separate object from the Product object with argument "source"
+  price = serializers.DecimalField(max_digits=6, decimal_places=2, source='unit_price')
+  # New field defining a new method which will return a value for this field
+  price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
+
+  #Defining the method
+  def calculate_tax(self, product: Product):
+    return product.unit_price * Decimal(1.1)

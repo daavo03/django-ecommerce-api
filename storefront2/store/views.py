@@ -52,7 +52,7 @@ def product_detail(request, id):
 """
 
 # Updating a product
-@api_view(['GET', 'PUT'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, id):
   # Using our shortcut function
   product = get_object_or_404(Product, pk=id)
@@ -67,6 +67,12 @@ def product_detail(request, id):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response(serializer.data)
+  elif request.method == 'DELETE':
+    # Before we delete a product we should check to see if there any orderitems associated with this product
+    if product.orderitems.count() > 0:
+      return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    product.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 

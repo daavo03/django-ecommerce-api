@@ -2,10 +2,12 @@ from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 from .models import Collection, Product
 from .serializers import CollectionSerializer, ProductSerializer
 
+""" 
 # Passing an array of strings that specify the HTTP methods we support at this method
 @api_view(['GET', 'POST'])
 # Here we should create a view function (take a request returns a response)
@@ -29,6 +31,7 @@ def product_list(request):
     # The save() method has some logic for extracting data from the dictionary to create/update a product
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+"""
 
 """  
 # Create another view function for seeing details of a product
@@ -52,6 +55,24 @@ def product_detail(request, id):
     return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
+# Converting function view to class view
+#Defining the class
+class ProductList(APIView):
+  # We're going to define 2 methods GET and POST
+  #Method for handling GET request
+  def get(self, request):
+    queryset = Product.objects.select_related('collection').all()
+    serializer = ProductSerializer(queryset, many=True, context={'request': request})
+    return Response(serializer.data)
+
+  #Method for handling POST request
+  def post(self, request):
+    serializer = ProductSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+""" 
 # Updating a product
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, id):
@@ -74,6 +95,32 @@ def product_detail(request, id):
       return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     product.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+"""
+
+# Get-Update-Delete a Product
+class ProductDetail(APIView):
+  def get(self, request, id):
+    product = get_object_or_404(Product, pk=id)
+    serializer = ProductSerializer(product)
+    return Response(serializer.data)
+
+  def put(self, request, id):
+    product = get_object_or_404(Product, pk=id)
+
+    serializer = ProductSerializer(product, data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
+
+  def delete(self, request, id):
+    product = get_object_or_404(Product, pk=id)
+
+    if product.orderitems.count() > 0:
+      return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    product.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+  
+
 
 # Getting all Collections / Create a Collection
 @api_view(['GET', 'POST'])

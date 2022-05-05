@@ -9,9 +9,10 @@ urlpatterns = [
     path('products/', views.ProductList.as_view()),
     # Adding a parameter
     #Applying a converter to this parameter
-    path('products/<int:id>/', views.ProductDetail.as_view()),
+    # Our generic view expects the parameter ID to be called PK, so we change it
+    path('products/<int:pk>/', views.ProductDetail.as_view()),
     path('collections/', views.CollectionList.as_view()),
     # We can give this mapping a name which is used in the serializer argument "view_name"
     # also changing the parameter to pk
-    path('collections/<int:pk>/', views.collection_detail, name='collection-detail')
+    path('collections/<int:pk>/', views.CollectionDetail.as_view(), name='collection-detail')
 ]

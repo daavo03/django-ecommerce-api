@@ -1,6 +1,6 @@
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -33,7 +33,6 @@ def product_list(request):
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 """
-
 """  
 # Create another view function for seeing details of a product
 @api_view()
@@ -55,7 +54,6 @@ def product_detail(request, id):
     # We just need to set the status to 404
     return Response(status=status.HTTP_404_NOT_FOUND)
 """
-
 """
 # Converting function view to class view
 #Defining the class
@@ -73,7 +71,6 @@ class ProductList(APIView):
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 """
-
 # Generic View for Getting all Products / Create a Product
 #With this implementation we can delete the 2 methods GET,POST
 class ProductList(ListCreateAPIView):
@@ -123,7 +120,7 @@ def product_detail(request, id):
     product.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 """
-
+""" 
 # Get-Update-Delete a Product
 class ProductDetail(APIView):
   def get(self, request, id):
@@ -146,7 +143,22 @@ class ProductDetail(APIView):
       return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     product.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
-  
+"""
+# Generic View for Get-Update-Delete a Product
+class ProductDetail(RetrieveUpdateDestroyAPIView):
+  queryset = Product.objects.all()
+  serializer_class = ProductSerializer
+  # If we still want to call our parameter ID instead of pk
+  #lookup_field = 'id'
+
+  # Overwriting the delete method inherit from the "RetrieveUp..." class to implement our delete logic
+  def delete(self, request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if product.orderitems.count() > 0:
+      return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    product.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 """ 
@@ -165,7 +177,6 @@ def collection_list(request):
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 """
-
 # Generic View for Getting all Collections / Create a Collection
 class CollectionList(ListCreateAPIView):
   queryset = Collection.objects.annotate(products_count=Count('products')).all()
@@ -173,6 +184,7 @@ class CollectionList(ListCreateAPIView):
 
 
 
+"""
 # Get-Update-Delete a Collection
 # Creating the view for collection_detail
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -190,6 +202,18 @@ def collection_detail(request, pk):
     return Response(serializer.data)
   elif request.method == 'DELETE':
     # Before deleting we're checking the collection has any products
+    if collection.products.count() > 0:
+      return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    collection.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+"""
+# Generic View for Get-Update-Delete a Collection
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+  queryset = Collection.objects.annotate(products_count=Count('products'))
+  serializer_class = CollectionSerializer
+
+  def delete(self, request, pk):
+    collection = get_object_or_404(Collection, pk=pk)
     if collection.products.count() > 0:
       return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     collection.delete()

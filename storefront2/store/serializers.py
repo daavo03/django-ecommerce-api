@@ -10,7 +10,11 @@ class CollectionSerializer(serializers.ModelSerializer):
   #Applying the same changes with the ModelSerializer
   class Meta:
     model = Collection
-    fields = ['id', 'title']
+    # Adding new "products_count" field
+    fields = ['id', 'title', 'products_count']
+
+  # Because Collection class doesn't have this field we have to define it
+  products_count = serializers.IntegerField()
 
 # Using ModelSerializer to quickly create a serializer. To a related field by default it use PK related field 
 class ProductSerializer(serializers.ModelSerializer):
@@ -47,7 +51,6 @@ class ProductSerializer(serializers.ModelSerializer):
   #   # This argument is used for generating hyperlink
   #   view_name='collection-detail'
   # )
-
 
   #Defining the method
   def calculate_tax(self, product: Product):

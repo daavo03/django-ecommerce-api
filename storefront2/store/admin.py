@@ -72,7 +72,8 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
-            products_count=Count('product')
+            # We use "products" because we change the name of the related field
+            products_count=Count('products')
         )
 
 

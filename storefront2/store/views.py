@@ -1,5 +1,6 @@
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -55,10 +56,10 @@ def product_detail(request, id):
     return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
+"""
 # Converting function view to class view
 #Defining the class
 class ProductList(APIView):
-  # We're going to define 2 methods GET and POST
   #Method for handling GET request
   def get(self, request):
     queryset = Product.objects.select_related('collection').all()
@@ -71,6 +72,32 @@ class ProductList(APIView):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+"""
+
+# Generic View for Getting all Products / Create a Product
+#With this implementation we can delete the 2 methods GET,POST
+class ProductList(ListCreateAPIView):
+  # We have 2 attributes queryset and serializer_class and we want to simply return an expression or class
+  queryset = Product.objects.select_related('collection').all()
+  serializer_class = ProductSerializer
+
+  # This methods are useful if we want to have some logic,condition for creating a queryset
+  # Maybe checking current user and depending on current user and their permissions provide diff querysets
+  #Overwriting queryset
+  #def get_queryset(self):
+      #return Product.objects.select_related('collection').all()
+
+  # Maybe diff users and diff roles can have diff serializer classes
+  #Overwriting serializer
+  #def get_serializer_class(self):
+      #return ProductSerializer()
+
+  # While creating this "ProductSerializer" we need to pass a context object. So we can overwrite
+  #the "get_serializer_context" and return our context object (dictionary that contains the request object)
+  def get_serializer_context(self):
+      return {'request': self.request}
+
+
 
 """ 
 # Updating a product
@@ -122,6 +149,7 @@ class ProductDetail(APIView):
   
 
 
+""" 
 # Getting all Collections / Create a Collection
 @api_view(['GET', 'POST'])
 def collection_list(request):
@@ -136,6 +164,14 @@ def collection_list(request):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+"""
+
+# Generic View for Getting all Collections / Create a Collection
+class CollectionList(ListCreateAPIView):
+  queryset = Collection.objects.annotate(products_count=Count('products')).all()
+  serializer_class = CollectionSerializer
+
+
 
 # Get-Update-Delete a Collection
 # Creating the view for collection_detail

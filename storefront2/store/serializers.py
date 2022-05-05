@@ -14,7 +14,9 @@ class CollectionSerializer(serializers.ModelSerializer):
     fields = ['id', 'title', 'products_count']
 
   # Because Collection class doesn't have this field we have to define it
-  products_count = serializers.IntegerField()
+  # Because we're using Generic views when creating a Collection this field it's required
+  #so we want to mark this field as readonly
+  products_count = serializers.IntegerField(read_only=True)
 
 # Using ModelSerializer to quickly create a serializer. To a related field by default it use PK related field 
 class ProductSerializer(serializers.ModelSerializer):

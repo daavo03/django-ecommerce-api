@@ -77,4 +77,14 @@ class ProductSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
   class Meta:
     model = Review
-    fields = ['id', 'date', 'name', 'description', 'product']
+    # We remove the product field because we want it to be autoimported
+    fields = ['id', 'date', 'name', 'description']
+
+  # Now we want to overwrite the create method for creating a review
+  def create(self, validated_data):
+      # Instead of relying in default implementation getting the values from fields we want to provide our own implementation
+      #First we're gonna read product_id
+      product_id = self.context['product_id']
+      #Then we can pass multiple k-v pairs, so we set the "product_id" to the value above, and then unpack the validated_data
+      #dictionary that we receive
+      return Review.objects.create(product_id=product_id, **validated_data)

@@ -2,21 +2,24 @@
 
 from django.urls import path
 from django.urls.conf import include
-# We also have another router DefaultRouter
-from rest_framework.routers import SimpleRouter, DefaultRouter
+# Now we'll use the router that comes with nested 
+from rest_framework_nested import routers
 from . import views
-
-
 
 
 # Creating router object
 # If we use DeafultRouter we get 2 additional features. 1) basic root view in localhost/store, 2) getting data in json adding .json of route
 #router = SimpleRouter()
-router = DefaultRouter()
+router = routers.DefaultRouter()
 # Register our viewsets with this router object. We'll be saying that the products endpoint should be manage by the ProductViewSet 
 #Passing 2 arguments: 1. Prefix value we're using as the name of our endpoint "products", 2. Our viewset
 router.register('products', views.ProductViewSet)
 router.register('collections', views.CollectionViewSet)
+
+# Creating nested default router
+products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
+# Registering the child resources
+products_router.register('reviews', views.ReviewViewSet, basename='product-reviews')
 
 """
 # URLConf
@@ -36,7 +39,8 @@ urlpatterns = [
 
 # URLConf
 # If we don't have explicit patterns
-urlpatterns = router.urls
+# Combining the urls of both routers and include them in the url pattern object
+urlpatterns = router.urls + products_router.urls
 """ 
 # If we have some specific patterns in the array
 urlpatterns = [

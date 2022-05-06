@@ -1,3 +1,4 @@
+from itertools import product
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -257,5 +258,17 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 
 # Creating ViewSet for Reviews
 class ReviewViewSet(ModelViewSet):
-  queryset = Review.objects.all()
+  # In this field we have access to URL parameters, so we can read the product ID from the URL and using a
+  #context object we can pass it to the serializer
+  #Remember we use a context object to provide additional data to a serializer
   serializer_class = ReviewSerializer
+
+  # We need to overwrite the queryset method to only the reviews for each product
+  def get_queryset(self):
+      # Applying a filter to get the reviews in each product 
+      return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+  # Overwriting the serializer context method
+  def get_serializer_context(self):
+      # The kwargs is a dictionary that contains our url parameters
+      return {'product_id': self.kwargs['product_pk']}

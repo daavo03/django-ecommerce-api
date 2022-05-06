@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 
+from .pagination import DefaultPagination
 from .filters import ProductFilter
 from .models import Collection, OrderItem, Product, Review
 from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
@@ -108,6 +109,7 @@ class ProductViewSet(ModelViewSet):
   # With the backend above all we have to do is specify the fields use for filtering, removing our filtering logic
   # Now for our custom filtering for multiple values we use "filterset_class" instead of "filterset_fields"
   filterset_class = ProductFilter
+  pagination_class = DefaultPagination
   # Setting up the search text based fields the search is case insensitive
   search_fields = ['title', 'description']
   # Specifying the ordering fields

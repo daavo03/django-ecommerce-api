@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Adding app for generic filtering
+    'django_filters',
     # Adding django REST framework
     'rest_framework',
     'playground',

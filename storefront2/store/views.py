@@ -1,12 +1,15 @@
 from itertools import product
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
+
+from .filters import ProductFilter
 from .models import Collection, OrderItem, Product, Review
 from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
 
@@ -101,22 +104,13 @@ class ProductList(ListCreateAPIView):
 # Using ViewSets for combining logic of multiple Generic views for Products
 #We end up with single class for implementing Products Endpoint
 class ProductViewSet(ModelViewSet):
+  # Bringing back the queryset
+  queryset = Product.objects.all()
   serializer_class = ProductSerializer
-
-  # Overwriting the get_queryset() method to apply filter
-  def get_queryset(self):
-      # Defining a queryset
-      queryset = Product.objects.all()
-      # Then try to read the collection ID from querystring
-      #To read query string parameters we need to go to "request.query_params" and use the get() method which returns
-      #none if it don't have a key by the name "collection_id" also as 2nd argument we can supply a default value
-      collection_id = self.request.query_params.get('collection_id')
-      if collection_id is not None:
-        # This is where we apply the filter so we get a new queryset to reset the previous queryset
-        queryset = queryset.filter(collection_id=collection_id)
-
-      return queryset
-
+  filter_backends = [DjangoFilterBackend]
+  # With the backend above all we have to do is specify the fields use for filtering, removing our filtering logic
+  # Now for our custom filtering for multiple values we use "filterset_class" instead of "filterset_fields"
+  filterset_class = ProductFilter
 
   def get_serializer_context(self):
       return {'request': self.request}

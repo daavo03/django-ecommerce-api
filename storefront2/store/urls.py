@@ -13,12 +13,13 @@ from . import views
 router = routers.DefaultRouter()
 # Register our viewsets with this router object. We'll be saying that the products endpoint should be manage by the ProductViewSet 
 #Passing 2 arguments: 1. Prefix value we're using as the name of our endpoint "products", 2. Our viewset
-router.register('products', views.ProductViewSet)
+#Explicitly specifying the basename bc we have a method for the queryset in the ProductViewSet
+router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
 
 # Creating nested default router
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
-# Registering the child resources
+# Registering the child resources. The basename is used to generate the name of our urlpatterns
 products_router.register('reviews', views.ReviewViewSet, basename='product-reviews')
 
 """

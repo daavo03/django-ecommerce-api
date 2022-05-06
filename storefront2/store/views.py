@@ -101,8 +101,22 @@ class ProductList(ListCreateAPIView):
 # Using ViewSets for combining logic of multiple Generic views for Products
 #We end up with single class for implementing Products Endpoint
 class ProductViewSet(ModelViewSet):
-  queryset = Product.objects.all()
   serializer_class = ProductSerializer
+
+  # Overwriting the get_queryset() method to apply filter
+  def get_queryset(self):
+      # Defining a queryset
+      queryset = Product.objects.all()
+      # Then try to read the collection ID from querystring
+      #To read query string parameters we need to go to "request.query_params" and use the get() method which returns
+      #none if it don't have a key by the name "collection_id" also as 2nd argument we can supply a default value
+      collection_id = self.request.query_params.get('collection_id')
+      if collection_id is not None:
+        # This is where we apply the filter so we get a new queryset to reset the previous queryset
+        queryset = queryset.filter(collection_id=collection_id)
+
+      return queryset
+
 
   def get_serializer_context(self):
       return {'request': self.request}

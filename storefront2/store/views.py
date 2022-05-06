@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
-from .models import Collection, OrderItem, Product
-from .serializers import CollectionSerializer, ProductSerializer
+from .models import Collection, OrderItem, Product, Review
+from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -254,3 +254,8 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 """
 
 
+
+# Creating ViewSet for Reviews
+class ReviewViewSet(ModelViewSet):
+  queryset = Review.objects.all()
+  serializer_class = ReviewSerializer

@@ -103,3 +103,14 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
+
+
+# New class for our Reviews
+#After creating, make the migrations and run them
+class Review(models.Model):
+    # Product that the review is for
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    # Name of the person leaving the review
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    date = models.DateField(auto_now_add=True)

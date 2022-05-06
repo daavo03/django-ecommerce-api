@@ -1,11 +1,8 @@
-from itertools import product
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 
@@ -107,10 +104,12 @@ class ProductViewSet(ModelViewSet):
   # Bringing back the queryset
   queryset = Product.objects.all()
   serializer_class = ProductSerializer
-  filter_backends = [DjangoFilterBackend]
+  filter_backends = [DjangoFilterBackend, SearchFilter]
   # With the backend above all we have to do is specify the fields use for filtering, removing our filtering logic
   # Now for our custom filtering for multiple values we use "filterset_class" instead of "filterset_fields"
   filterset_class = ProductFilter
+  # Setting up the search text based fields the search is case insensitive
+  search_fields = ['title', 'description']
 
   def get_serializer_context(self):
       return {'request': self.request}

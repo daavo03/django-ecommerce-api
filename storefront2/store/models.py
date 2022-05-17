@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from uuid import uuid4
 
 
 class Promotion(models.Model):
@@ -96,13 +97,21 @@ class Address(models.Model):
 
 
 class Cart(models.Model):
+    # Redefining PK field with a GUID, we don't call the function to not hard code and get all the carts the same value
+    id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    # Assigning a related_name that means in our cart model we're going to have a field called items
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
+
+    # Using Meta class to apply a unique constraint to have a single instance of a product in a shopping cart, 
+    #If same product to same cart, only increase quantity
+    class Meta:
+        unique_together = [['cart', 'product']]
 
 
 # New class for our Reviews

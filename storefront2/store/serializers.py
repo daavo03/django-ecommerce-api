@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Product, Collection, Review
+from store.models import Product, Collection, Review, Cart
 
 
 # Including a Nested Object. First we need to create a class
@@ -88,3 +88,13 @@ class ReviewSerializer(serializers.ModelSerializer):
       #Then we can pass multiple k-v pairs, so we set the "product_id" to the value above, and then unpack the validated_data
       #dictionary that we receive
       return Review.objects.create(product_id=product_id, **validated_data)
+
+
+# New class for the cart
+class CartSerializer(serializers.ModelSerializer):
+  id = serializers.UUIDField(read_only=True)
+  class Meta:
+    model = Cart
+    # Returning to the client only the id, but we want to declare this field as read only, so that we don't have to
+    #send it to the server we're only going to read it from the server 
+    fields = ['id']

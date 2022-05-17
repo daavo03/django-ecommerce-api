@@ -16,6 +16,8 @@ router = routers.DefaultRouter()
 #Explicitly specifying the basename bc we have a method for the queryset in the ProductViewSet
 router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
+# Registering new end point for the cart
+router.register('carts', views.CartsViewSet)
 
 # Creating nested default router
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')

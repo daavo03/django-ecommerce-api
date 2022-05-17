@@ -2,14 +2,15 @@ from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
-from .models import Collection, OrderItem, Product, Review
-from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
+from .models import Cart, Collection, OrderItem, Product, Review
+from .serializers import CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -283,3 +284,11 @@ class ReviewViewSet(ModelViewSet):
   def get_serializer_context(self):
       # The kwargs is a dictionary that contains our url parameters
       return {'product_id': self.kwargs['product_pk']}
+
+
+# Create a Custom ViewSet for Carts
+#We're not going to inherit from ModelViewSet because this class provides all operations, we only need to support
+#Create, Get a cart and Delete
+class CartsViewSet(CreateModelMixin, GenericViewSet):
+  queryset = Cart.objects.all()
+  serializer_class = CartSerializer

@@ -164,3 +164,11 @@ SIMPLE_JWT = {
 
 # Telling Django we're going to use the new redefine User class in the Auth System. So we define a new setting
 AUTH_USER_MODEL = 'core.User'
+
+# Registering the serializer
+DJOSER = {
+    'SERIALIZERS': {
+        # 'user_create' taken from doc and the value is the PATH to our custom serializer
+        'user_create': 'core.serializers.UserCreateSerializer'
+    }
+}

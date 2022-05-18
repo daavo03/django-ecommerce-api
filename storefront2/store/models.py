@@ -92,6 +92,13 @@ class Order(models.Model):
         max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
+    # Adding a Meta class to create Custom Permission
+    class Meta:
+        permissions = [
+            # Each tuple represents a permission, with 2 values 1) Codename 2) Description
+            ('cancel_order', 'Can cancel an order')
+        ]
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)

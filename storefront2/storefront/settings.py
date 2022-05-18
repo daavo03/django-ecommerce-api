@@ -44,9 +44,9 @@ INSTALLED_APPS = [
     'playground',
     'debug_toolbar',
     'store',
-    'store_custom',
     'tags',
-    'likes'
+    'likes',
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -150,3 +150,6 @@ REST_FRAMEWORK = {
     # To have pagination everywhere, with this we don't need to specify the pagination class per view or viewset
     #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
+
+# Telling Django we're going to use the new redefine User class in the Auth System. So we define a new setting
+AUTH_USER_MODEL = 'core.User'

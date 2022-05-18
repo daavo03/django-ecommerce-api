@@ -1,5 +1,6 @@
 # Mapping the view function to URL pattern
 
+from cgitb import lookup
 from django.urls import path
 from django.urls.conf import include
 # Now we'll use the router that comes with nested 
@@ -24,6 +25,14 @@ products_router = routers.NestedDefaultRouter(router, 'products', lookup='produc
 # Registering the child resources. The basename is used to generate the name of our urlpatterns
 products_router.register('reviews', views.ReviewViewSet, basename='product-reviews')
 
+# Creating nested router for the cartItems
+#Once we set the lookup to "cart" we have a URL paramter called "cart_pk" that's how we extract the URL paramter from the
+#overwrote queryset
+carts_router = routers.NestedDefaultRouter(router, 'carts', lookup='cart')
+# On this router we register a new endpoint and map it to views of "CartItemViewSet"
+carts_router.register('items', views.CartItemViewSet, basename='cart-items')
+
+
 """
 # URLConf
 urlpatterns = [
@@ -43,7 +52,8 @@ urlpatterns = [
 # URLConf
 # If we don't have explicit patterns
 # Combining the urls of both routers and include them in the url pattern object
-urlpatterns = router.urls + products_router.urls
+# Including the new routers urls in the url patterns list
+urlpatterns = router.urls + products_router.urls + carts_router.urls
 """ 
 # If we have some specific patterns in the array
 urlpatterns = [

@@ -1,3 +1,4 @@
+from select import select
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,8 +10,8 @@ from rest_framework import status
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
-from .models import Cart, Collection, OrderItem, Product, Review
-from .serializers import CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer
+from .models import Cart, CartItem, Collection, OrderItem, Product, Review
+from .serializers import CartItemsSerializer, CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -298,3 +299,15 @@ class CartsViewSet(CreateModelMixin,
   #We want to prefetch a cart with "items" and for each item we also wanna preload a product so we add "__product"
   queryset = Cart.objects.prefetch_related('items__product').all()
   serializer_class = CartSerializer
+
+
+# Creating ViewSet for a CartItem
+class CartItemViewSet(ModelViewSet):
+  serializer_class = CartItemsSerializer
+
+  # Overwriting the queryset bc we want to filter by cart ID
+  def get_queryset(self):
+      # We're gonna extract the cart ID as a URL parameter from "self.kwargs['cart_pk']"
+      return CartItem.objects \
+        .filter(cart_id=self.kwargs['cart_pk']) \
+        .select_related('product')

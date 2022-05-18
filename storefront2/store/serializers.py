@@ -1,8 +1,9 @@
 # A Serializer convers a model instance to a dictionary
 
+from dataclasses import field
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Product, Collection, Review, Cart
+from store.models import CartItem, Product, Collection, Review, Cart
 
 
 # Including a Nested Object. First we need to create a class
@@ -90,11 +91,49 @@ class ReviewSerializer(serializers.ModelSerializer):
       return Review.objects.create(product_id=product_id, **validated_data)
 
 
-# New class for the cart
+# Defining new Serializer for serializing a Product in a Shopping CartItem  
+class SimpleProductSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Product
+    # only see the fields we want when returning a cart
+    fields = ['id', 'title', 'unit_price']
+
+
+# New Serializer for the CartItems we put it above the cart serializer bc we need to use it in it
+class CartItemsSerializer(serializers.ModelSerializer):
+  # Redefining product field to see the product object
+  product = SimpleProductSerializer()
+  # Adding the total price for each item, which is going to be a calculated field
+  total_price = serializers.SerializerMethodField()
+
+  # With the fields like "total_price" above we can follow a particular convention for defining the method that returns
+  #the value for this field "get_nameOfTheField"
+  def get_total_price(self, cart_item:CartItem):
+    return cart_item.quantity * cart_item.product.unit_price
+
+  class Meta:
+    model = CartItem
+    fields = ['id', 'product', 'quantity', 'total_price']
+
+
+
+# New Serializer for the cart
 class CartSerializer(serializers.ModelSerializer):
+  # Declaring this field as read only, so that we don't have to send it to the server we're only going to read it from the server 
   id = serializers.UUIDField(read_only=True)
+  # Defining explicitly the items field with many=True to see actual cart items
+  items = CartItemsSerializer(many=True) 
+  # Total price for our cart
+  total_price = serializers.SerializerMethodField()
+
+  def get_total_price(self, cart):
+    # Here we add a list comprehension, the collection here is "cart.items.all()" bc cart.items returns a manager object, so
+    #using all we get the queryset which returns all the items
+    # Then for each item instead of returning the item we want to return the quantity times unit_price
+    # With the final expression we get a list of totals, so we need to sum all of them
+    return sum([item.quantity * item.product.unit_price for item in cart.items.all()])
   class Meta:
     model = Cart
-    # Returning to the client only the id, but we want to declare this field as read only, so that we don't have to
-    #send it to the server we're only going to read it from the server 
-    fields = ['id']
+    # Returning to the client only the id, Adding 'items' field to returning the cart items
+    fields = ['id', 'items', 'total_price']
+

@@ -1,6 +1,5 @@
 # A Serializer convers a model instance to a dictionary
 
-from dataclasses import field
 from decimal import Decimal
 from rest_framework import serializers
 from store.models import CartItem, Product, Collection, Review, Cart
@@ -100,7 +99,7 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 
 
 # New Serializer for the CartItems we put it above the cart serializer bc we need to use it in it
-class CartItemsSerializer(serializers.ModelSerializer):
+class CartItemSerializer(serializers.ModelSerializer):
   # Redefining product field to see the product object
   product = SimpleProductSerializer()
   # Adding the total price for each item, which is going to be a calculated field
@@ -122,7 +121,7 @@ class CartSerializer(serializers.ModelSerializer):
   # Declaring this field as read only, so that we don't have to send it to the server we're only going to read it from the server 
   id = serializers.UUIDField(read_only=True)
   # Defining explicitly the items field with many=True to see actual cart items, also marking it as read_only
-  items = CartItemsSerializer(many=True, read_only=True) 
+  items = CartItemSerializer(many=True, read_only=True) 
   # Total price for our cart
   total_price = serializers.SerializerMethodField()
 
@@ -137,3 +136,43 @@ class CartSerializer(serializers.ModelSerializer):
     # Returning to the client only the id, Adding 'items' field to returning the cart items
     fields = ['id', 'items', 'total_price']
 
+
+# Serializer for adding items to cart
+class AddCartItemSerializer(serializers.ModelSerializer):
+  # Explicitly defining product_id field
+  product_id = serializers.IntegerField()
+
+  # Validate invalid fields with "validate_fieldName(self, valueValidating(in this case product_id))"
+  def validate_product_id(self, value):
+    if not Product.objects.filter(pk=value).exists():
+      raise serializers.ValidationError('No product with the given id was found')
+    return value
+
+  # Overwriting the save method to nor create multiple cart item records, we want to update quantity of existing item
+  def save(self, **kwargs):
+      # Reading the Cart ID
+      cart_id = self.context['cart_id']
+
+      # Here we need to get the product_id and quantity
+      #Behind the scenes there's a call to serializer.is_valid(), when data gets validated then we can get it from an 
+      #attribute "validated_data". BC currently we're inside our serializer class so we say "self.validated_data" which
+      #is a dictionary and from there we can read the "product_id" received from the client
+      product_id = self.validated_data['product_id']
+      quantity = self.validated_data['quantity']
+
+      # Saving logic
+      #If there's no such cart item it wil throw exception so wrap all this inside a try/except block
+      try:
+        cart_item = CartItem.objects.get(cart_id=cart_id, product_id=product_id)
+        # Update an existing item
+        cart_item.quantity += quantity
+        cart_item.save()
+        self.instance = cart_item
+      except CartItem.DoesNotExist:
+        # Create a new item
+        self.instance = CartItem.objects.create(cart_id=cart_id, **self.validated_data)
+
+      return self.instance
+  class Meta:
+    model = CartItem
+    fields = ['id', 'product_id', 'quantity']

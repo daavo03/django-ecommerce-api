@@ -106,7 +106,10 @@ class CartItem(models.Model):
     # Assigning a related_name that means in our cart model we're going to have a field called items
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        # Ensuring quantities greater than 0
+        validators=[MinValueValidator(1)]
+    )
 
     # Using Meta class to apply a unique constraint to have a single instance of a product in a shopping cart, 
     #If same product to same cart, only increase quantity

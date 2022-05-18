@@ -121,8 +121,8 @@ class CartItemsSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
   # Declaring this field as read only, so that we don't have to send it to the server we're only going to read it from the server 
   id = serializers.UUIDField(read_only=True)
-  # Defining explicitly the items field with many=True to see actual cart items
-  items = CartItemsSerializer(many=True) 
+  # Defining explicitly the items field with many=True to see actual cart items, also marking it as read_only
+  items = CartItemsSerializer(many=True, read_only=True) 
   # Total price for our cart
   total_price = serializers.SerializerMethodField()
 

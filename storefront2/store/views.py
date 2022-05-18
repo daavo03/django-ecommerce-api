@@ -2,7 +2,7 @@ from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
@@ -289,7 +289,10 @@ class ReviewViewSet(ModelViewSet):
 # Create a Custom ViewSet for Carts
 #We're not going to inherit from ModelViewSet because this class provides all operations, we only need to support
 #Create, Get a cart and Delete
-class CartsViewSet(CreateModelMixin, RetrieveModelMixin, GenericViewSet):
+class CartsViewSet(CreateModelMixin, 
+                   RetrieveModelMixin, 
+                   DestroyModelMixin, 
+                   GenericViewSet):
   # We need to user eager loading so when retrieving a cart we want to eager load that cart with those items and products
   #In the queryset we call "prefetch_related" bc a cart can have multiple items (for FK where we have single related object we can use select_related)
   #We want to prefetch a cart with "items" and for each item we also wanna preload a product so we add "__product"

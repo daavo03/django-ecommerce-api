@@ -6,5 +6,4 @@ class UserCreateSerializer(BaseUserCreateSerializer):
   # We want this Meta class to inherit everything in the Meta class of the "BaseUserCreateSerializer" class
   class Meta(BaseUserCreateSerializer.Meta):
     # We only overwrite fields attribute
-    # Adding profile data "birth_"
     fields = ['id', 'username', 'password', 'email', 'first_name', 'last_name']  

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_filters',
     # Adding django REST framework
     'rest_framework',
+    'djoser',
     'playground',
     'debug_toolbar',
     'store',
@@ -149,6 +150,16 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
     # To have pagination everywhere, with this we don't need to specify the pagination class per view or viewset
     #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+
+    # Setting for JWT
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Setting specific to the JWT library
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('JWT',),
 }
 
 # Telling Django we're going to use the new redefine User class in the Auth System. So we define a new setting

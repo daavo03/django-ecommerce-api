@@ -26,5 +26,7 @@ urlpatterns = [
     # Importing the url in the main urls module
     #If the URL request starts with "store" if should be handle by "store.urls" module
     path('store/', include('store.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

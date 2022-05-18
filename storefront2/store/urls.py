@@ -1,6 +1,5 @@
 # Mapping the view function to URL pattern
 
-from cgitb import lookup
 from django.urls import path
 from django.urls.conf import include
 # Now we'll use the router that comes with nested 
@@ -19,6 +18,7 @@ router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
 # Registering new end point for the cart
 router.register('carts', views.CartsViewSet)
+router.register('customers', views.CustomerViewSet)
 
 # Creating nested default router
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')

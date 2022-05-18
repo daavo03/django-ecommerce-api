@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import CartItem, Product, Collection, Review, Cart
+from store.models import CartItem, Customer, Product, Collection, Review, Cart
 
 
 # Including a Nested Object. First we need to create a class
@@ -182,3 +182,13 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
   class Meta:
     model = CartItem
     fields = ['quantity']
+
+
+# Serializer for the Profile 
+class CustomerSerializer(serializers.ModelSerializer):
+  # Explicitly defining the "user_id" field even though we have the attribute in the Customer Model bc is created dynamically at runtime
+  user_id = serializers.IntegerField()
+
+  class Meta:
+    model = Customer
+    fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']

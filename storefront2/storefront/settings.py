@@ -158,11 +158,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Setting specific to the JWT library
-SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
-}
-
 # Telling Django we're going to use the new redefine User class in the Auth System. So we define a new setting
 AUTH_USER_MODEL = 'core.User'
 
@@ -170,11 +165,13 @@ AUTH_USER_MODEL = 'core.User'
 DJOSER = {
     'SERIALIZERS': {
         # 'user_create' taken from doc and the value is the PATH to our custom serializer
-        'user_create': 'core.serializers.UserCreateSerializer'
+        'user_create': 'core.serializers.UserCreateSerializer',
+        'current_user': 'core.serializers.UserSerializer',
     }
 }
 
 # Overwriting the settings for the JWT
 SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }

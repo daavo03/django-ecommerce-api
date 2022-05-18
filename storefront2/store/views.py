@@ -12,7 +12,7 @@ from rest_framework import status
 from .pagination import DefaultPagination
 from .filters import ProductFilter
 from .models import Cart, CartItem, Collection, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -304,10 +304,15 @@ class CartsViewSet(CreateModelMixin,
 
 # Creating ViewSet for a CartItem
 class CartItemViewSet(ModelViewSet):
+  # Preventing PUT requests with the attribute "http_method_names" set it to a list of methods allowed at this endpoint
+  http_method_names = ['get', 'post', 'patch', 'delete']
+
   # Dynamically returning serializer_class depending on the request method
   def get_serializer_class(self):
       if self.request.method == 'POST':
         return AddCartItemSerializer
+      if self.request.method == 'PATCH':
+        return UpdateCartItemSerializer
       return CartItemSerializer
 
   # The cart ID it's in the URL in the serializer we don't have access to URL params, so here in the view we get

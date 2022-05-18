@@ -3,6 +3,7 @@ from select import select
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.response import Response
@@ -333,3 +334,25 @@ class CartItemViewSet(ModelViewSet):
 class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
   queryset = Customer.objects.all()
   serializer_class = CustomerSerializer
+
+  # Defining a custom action and decorate it with the action decorator
+  # If we set the detail to F, this action is available in the list view: /customers/me, IF detail to T, the action
+  #is gonna be available on the detail view: /customers/1/me
+  @action(detail=False, methods=['GET', 'PUT'])
+  def me(self, request):
+    # Every request has an user attribute, if User not log is then is gonna be set to an instance of the "AnonymousUser" class
+    # Retrieving customer with user.id and returning it to the client
+    # The "get_or_create" method does not return a customer object it returns a tuple with 2 values: 1) customer object, 2) boolean
+    #that tell us if the object was created or not. So we take the tuple and unpacking it immediately to get customer obj
+    (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+
+    if request.method == 'GET':
+      # Serializing customer object
+      serializer = CustomerSerializer(customer)
+      return Response(serializer.data)
+    elif request.method == 'PUT':
+      serializer = CustomerSerializer(customer, data=request.data)
+      # Validate incoming data
+      serializer.is_valid(raise_exception=True)
+      serializer.save()
+      return Response(serializer.data)

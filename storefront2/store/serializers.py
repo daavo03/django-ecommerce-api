@@ -187,7 +187,8 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
 # Serializer for the Profile 
 class CustomerSerializer(serializers.ModelSerializer):
   # Explicitly defining the "user_id" field even though we have the attribute in the Customer Model bc is created dynamically at runtime
-  user_id = serializers.IntegerField()
+  # Also marking it as "read_only" bc we don't want to associate this profile with someone's else account
+  user_id = serializers.IntegerField(read_only=True)
 
   class Meta:
     model = Customer

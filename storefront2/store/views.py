@@ -381,5 +381,21 @@ class CustomerViewSet(ModelViewSet):
 
 # View Set for the Orders
 class OrderViewSet(ModelViewSet):
-  queryset = Order.objects.all()
   serializer_class = OrderSerializer
+  # Applying Permission classes to secure our endpoint
+  permission_classes = [IsAuthenticated]
+
+  # If not Admin only seeing it's own orders. So overwriting the queryset
+  def get_queryset(self):
+      user = self.request.user
+
+      if user.is_staff:
+        return Order.objects.all()
+
+      # From the user_id we need to calculate the customer_id, we add the only() method to pick only the id field we need from the object
+      # If the current user doesn't have a customer record or a profile, the get() method throw an exception bc expects 1 
+      #record in the DB if we have 0 or more than 1 record matching the criteria we get an exception. So we use get_or_create() 
+      #which returns a tuple with 2 values: 1) object we're reading 2) boolean indicates if the record was created or not
+      (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
+      # Otherwise we want to apply a filter and retrieve orders for a specific customer
+      return Order.objects.filter(customer_id=customer_id)

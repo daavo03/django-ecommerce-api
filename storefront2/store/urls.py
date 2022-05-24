@@ -20,7 +20,9 @@ router.register('collections', views.CollectionViewSet)
 router.register('carts', views.CartsViewSet)
 router.register('customers', views.CustomerViewSet)
 # Registering new end point for orders
-router.register('orders', views.OrderViewSet)
+# Because we remove the "queryset" attribute from the OrderViewSet and we're overwriting the get_queryset(),
+#Django rest framework cannot figure out the basename for our endpoint, so we set the basename for this endpoint for generating the name of views 
+router.register('orders', views.OrderViewSet, basename='orders')
 
 # Creating nested default router
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')

@@ -213,3 +213,21 @@ class OrderSerializer(serializers.ModelSerializer):
   class Meta:
     model = Order
     fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+
+# Serializer for Creating an Order we'll use Base Serializer
+class CreateOrderSerializer(serializers.Serializer):
+  cart_id = serializers.UUIDField()
+
+  # Overwriting the save method bc the logic to saving an order is specific(we need to go to shopping cart table,
+  # grab all cart items, move them to the order items table and delete the shopping cart)
+  def save(self, **kwargs):
+      # Printing cart ID which is in validated date, and user ID but we don't have access to request obj bc it's a serial
+      #so we have2g to view set and using context object pass the user id here
+      print(self.validated_data['cart_id'])
+      print(self.context['user_id'])
+
+      # Getting the customer object
+      (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
+
+      # With these 2 IDs we can create an order object which we only need pass the customer
+      Order.objects.create(customer=customer)

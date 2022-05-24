@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
@@ -334,10 +335,22 @@ class CartItemViewSet(ModelViewSet):
 class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
   queryset = Customer.objects.all()
   serializer_class = CustomerSerializer
+  # We can supply multiple permission classes, if any fails then client will not be able to access this view
+  #All actions in this view set are closed to anonymous users
+  permission_classes = [IsAuthenticated]
 
-  # Defining a custom action and decorate it with the action decorator
-  # If we set the detail to F, this action is available in the list view: /customers/me, IF detail to T, the action
+  # If we want to have diff permissions for diff actions, we need to overwrite the method inherit in this view set "get_permissions" 
+  def get_permissions(self):
+      if self.request.method == 'GET':
+        # We should return a list of objects not classes
+        return [AllowAny()]
+      # For everything else needs to be authenticated
+      return [IsAuthenticated()]
+
+  # Defining a custom action and decorate it with the action decorator in rest framework
+  # If we set the detail argument to F, this action is available in the list view: /customers/me, IF detail to T, the action
   #is gonna be available on the detail view: /customers/1/me
+  # If we want to we can overwrite the permission in this particular action
   @action(detail=False, methods=['GET', 'PUT'])
   def me(self, request):
     # Every request has an user attribute, if User not log is then is gonna be set to an instance of the "AnonymousUser" class

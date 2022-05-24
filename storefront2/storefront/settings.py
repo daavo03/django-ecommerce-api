@@ -156,6 +156,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # # Settings for permission classes globally
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     # We add permission class as a string, default value is 'AllowAny'
+    #     'rest_framework.permissions.IsAuthenticated'
+    # ]
 }
 
 # Telling Django we're going to use the new redefine User class in the Auth System. So we define a new setting

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import CartItem, Customer, Product, Collection, Review, Cart
+from store.models import CartItem, Customer, Order, OrderItem, Product, Collection, Review, Cart
 
 
 # Including a Nested Object. First we need to create a class
@@ -193,3 +193,23 @@ class CustomerSerializer(serializers.ModelSerializer):
   class Meta:
     model = Customer
     fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
+
+# Serializer for the OrderItem
+class OrderItemSerializer(serializers.ModelSerializer):
+  # Changing the product to a nested object to return all critic info about each product so client doesn't have to send
+  #additional requests to each product in the Order
+  product = SimpleProductSerializer()
+
+
+  class Meta:
+    model = OrderItem
+    # We're not including order here bc we're gonna use this serializer inside our Order Serializer
+    fields = ['id', 'product', 'unit_price', 'quantity']
+
+
+# Serializer for the Orders
+class OrderSerializer(serializers.ModelSerializer):
+  items = OrderItemSerializer(many=True)
+  class Meta:
+    model = Order
+    fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']

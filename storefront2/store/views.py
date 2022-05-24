@@ -15,8 +15,8 @@ from .permissions import FullDJangoModelPermissions, IsAdminOrReadOnly, ViewCust
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
-from .models import Cart, CartItem, Collection, Customer, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CustomerSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -377,3 +377,9 @@ class CustomerViewSet(ModelViewSet):
       serializer.is_valid(raise_exception=True)
       serializer.save()
       return Response(serializer.data)
+
+
+# View Set for the Orders
+class OrderViewSet(ModelViewSet):
+  queryset = Order.objects.all()
+  serializer_class = OrderSerializer

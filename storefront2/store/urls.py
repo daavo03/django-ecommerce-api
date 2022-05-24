@@ -19,6 +19,8 @@ router.register('collections', views.CollectionViewSet)
 # Registering new end point for the cart
 router.register('carts', views.CartsViewSet)
 router.register('customers', views.CustomerViewSet)
+# Registering new end point for orders
+router.register('orders', views.OrderViewSet)
 
 # Creating nested default router
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')

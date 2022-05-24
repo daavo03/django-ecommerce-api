@@ -6,10 +6,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
+
+from .permissions import IsAdminOrReadOnly
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
@@ -115,6 +117,8 @@ class ProductViewSet(ModelViewSet):
   # Now for our custom filtering for multiple values we use "filterset_class" instead of "filterset_fields"
   filterset_class = ProductFilter
   pagination_class = DefaultPagination
+  # Applying the custom permission to this view
+  permission_classes = [IsAdminOrReadOnly]
   # Setting up the search text based fields the search is case insensitive
   search_fields = ['title', 'description']
   # Specifying the ordering fields
@@ -226,6 +230,7 @@ class CollectionList(ListCreateAPIView):
 class CollectionViewSet(ModelViewSet):
   queryset = Collection.objects.annotate(products_count=Count('products')).all()
   serializer_class = CollectionSerializer
+  permission_classes = [IsAdminOrReadOnly]
 
   def destroy(self, request, *args, **kwargs):
     if Product.objects.filter(collection_id=kwargs['pk']).count() > 0:
@@ -331,27 +336,20 @@ class CartItemViewSet(ModelViewSet):
         .select_related('product')
 
 
-# ViewSet for the Profile
-class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+# ViewSet for the Profile, now we allow all operations but restricted only to admin users but any auth user should be able to access the profile
+class CustomerViewSet(ModelViewSet):
   queryset = Customer.objects.all()
   serializer_class = CustomerSerializer
   # We can supply multiple permission classes, if any fails then client will not be able to access this view
   #All actions in this view set are closed to anonymous users
-  permission_classes = [IsAuthenticated]
+  permission_classes = [IsAdminUser]
 
-  # If we want to have diff permissions for diff actions, we need to overwrite the method inherit in this view set "get_permissions" 
-  def get_permissions(self):
-      if self.request.method == 'GET':
-        # We should return a list of objects not classes
-        return [AllowAny()]
-      # For everything else needs to be authenticated
-      return [IsAuthenticated()]
 
   # Defining a custom action and decorate it with the action decorator in rest framework
   # If we set the detail argument to F, this action is available in the list view: /customers/me, IF detail to T, the action
   #is gonna be available on the detail view: /customers/1/me
   # If we want to we can overwrite the permission in this particular action
-  @action(detail=False, methods=['GET', 'PUT'])
+  @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
   def me(self, request):
     # Every request has an user attribute, if User not log is then is gonna be set to an instance of the "AnonymousUser" class
     # Retrieving customer with user.id and returning it to the client

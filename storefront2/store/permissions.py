@@ -20,3 +20,11 @@ class FullDJangoModelPermissions(permissions.DjangoModelPermissions):
   def __init__(self) -> None:
       # To send the GET request, the user should have the view permission
       self.perms_map['GET'] = ['%(app_label)s.view_%(model_name)s']
+
+
+# Creating new permission class for viewing history of a particular customer
+class ViewCustomerHistoryPermission(permissions.BasePermission):
+  def has_permission(self, request, view):
+      # The user object has a method has_perm() where we pass the code name for the permission we start with the 'app_name.permission_name'
+      #If it returns True then the user is gonna have permission and they'll be able to access the history
+      return request.user.has_perm('store.view_history')

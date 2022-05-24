@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 
-from .permissions import FullDJangoModelPermissions, IsAdminOrReadOnly
+from .permissions import FullDJangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
@@ -346,6 +346,13 @@ class CustomerViewSet(ModelViewSet):
   # We also have [DjangoModelPermissionsOrAnonReadOnly] here anonymous users will have read only access to data
   #All actions in this view set are closed to anonymous users, Only Admin users can manage customers via customers endpoint
   permission_classes = [IsAdminUser]
+
+  # Creating custom action for viewing the history of a particular customer 
+  # We use the pk, and detail to True argument because this is for a particular customer
+  # Finally we decorate this custom action with our new permission class
+  @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
+  def history(self, request, pk):
+    return Response('ok')
 
 
   # Defining a custom action and decorate it with the action decorator in rest framework

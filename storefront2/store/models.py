@@ -4,7 +4,6 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
 
-
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
     discount = models.FloatField()
@@ -75,6 +74,13 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
+        # Creating a custom permission
+        permissions = [
+            # The list of tuples should include 2 values: 1) code name for permission, 2) description for the permission
+            # Remember that after we modify the model we need to create migration and run it so that this permission
+            #is stored in the db
+            ('view_history', 'Can view history')
+        ]
 
 
 class Order(models.Model):

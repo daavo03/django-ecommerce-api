@@ -6,12 +6,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 
-from .permissions import IsAdminOrReadOnly
+from .permissions import FullDJangoModelPermissions, IsAdminOrReadOnly
 
 from .pagination import DefaultPagination
 from .filters import ProductFilter
@@ -341,7 +341,10 @@ class CustomerViewSet(ModelViewSet):
   queryset = Customer.objects.all()
   serializer_class = CustomerSerializer
   # We can supply multiple permission classes, if any fails then client will not be able to access this view
-  #All actions in this view set are closed to anonymous users
+  # When we apply this permission the user has to be auth and they should have the relevant model permissions
+  #permission_classes = [FullDJangoModelPermissions]
+  # We also have [DjangoModelPermissionsOrAnonReadOnly] here anonymous users will have read only access to data
+  #All actions in this view set are closed to anonymous users, Only Admin users can manage customers via customers endpoint
   permission_classes = [IsAdminUser]
 
 

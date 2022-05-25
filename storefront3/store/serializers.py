@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
 from .signals import order_created
-from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
+from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, ProductImage, Review
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -171,3 +171,15 @@ class CreateOrderSerializer(serializers.Serializer):
             order_created.send_robust(self.__class__, order=order)
 
             return order
+
+# Serializer for uploading an image
+class ProductImageSerializer(serializers.ModelSerializer):
+    # Overwriting the create method so we grab the product ID from the context and use it to create a ProductImage obj 
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        # Explicitly creating the product image obj
+        return ProductImage.objects.create(product_id=product_id, **validated_data)
+
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image']

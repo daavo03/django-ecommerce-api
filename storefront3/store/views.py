@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 from .filters import ProductFilter
-from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, ProductImage, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 
 
 class ProductViewSet(ModelViewSet):
@@ -141,3 +141,17 @@ class OrderViewSet(ModelViewSet):
         customer_id = Customer.objects.only(
             'id').get(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
+
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+
+    # In the view set we have access to the URL params. Extracting the product_pk and using a context obj pass it to 
+    #the serializer
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}
+    
+    # Overwriting the queryset method to only return the images for a particular product
+    def get_queryset(self):
+        # Getting the Product ID from the URL
+        return ProductImage.objects.filter(product_id=self.kwargs['product_pk'])

@@ -12,12 +12,27 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     products_count = serializers.IntegerField(read_only=True)
 
+# Serializer for uploading an image
+class ProductImageSerializer(serializers.ModelSerializer):
+    # Overwriting the create method so we grab the product ID from the context and use it to create a ProductImage obj 
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        # Explicitly creating the product image obj
+        return ProductImage.objects.create(product_id=product_id, **validated_data)
+
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image']
 
 class ProductSerializer(serializers.ModelSerializer):
+    # Adding the "images" field to fields parameter and defining it above here setting many to True bc product c/h many 
+    #images and read_only bc when creating a product we don't want to pass multiple images only pass properties related to
+    #product obj
+    images = ProductImageSerializer(many=True, read_only=True)
     class Meta:
         model = Product
         fields = ['id', 'title', 'description', 'slug', 'inventory',
-                  'unit_price', 'price_with_tax', 'collection']
+                  'unit_price', 'price_with_tax', 'collection', 'images']
 
     price_with_tax = serializers.SerializerMethodField(
         method_name='calculate_tax')
@@ -171,15 +186,3 @@ class CreateOrderSerializer(serializers.Serializer):
             order_created.send_robust(self.__class__, order=order)
 
             return order
-
-# Serializer for uploading an image
-class ProductImageSerializer(serializers.ModelSerializer):
-    # Overwriting the create method so we grab the product ID from the context and use it to create a ProductImage obj 
-    def create(self, validated_data):
-        product_id = self.context['product_id']
-        # Explicitly creating the product image obj
-        return ProductImage.objects.create(product_id=product_id, **validated_data)
-
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image']

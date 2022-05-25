@@ -363,9 +363,7 @@ class CustomerViewSet(ModelViewSet):
   def me(self, request):
     # Every request has an user attribute, if User not log is then is gonna be set to an instance of the "AnonymousUser" class
     # Retrieving customer with user.id and returning it to the client
-    # The "get_or_create" method does not return a customer object it returns a tuple with 2 values: 1) customer object, 2) boolean
-    #that tell us if the object was created or not. So we take the tuple and unpacking it immediately to get customer obj
-    (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+    customer = Customer.objects.get(user_id=request.user.id)
 
     if request.method == 'GET':
       # Serializing customer object
@@ -423,9 +421,7 @@ class OrderViewSet(ModelViewSet):
         return Order.objects.all()
 
       # From the user_id we need to calculate the customer_id, we add the only() method to pick only the id field we need from the object
-      # If the current user doesn't have a customer record or a profile, the get() method throw an exception bc expects 1 
-      #record in the DB if we have 0 or more than 1 record matching the criteria we get an exception. So we use get_or_create() 
-      #which returns a tuple with 2 values: 1) object we're reading 2) boolean indicates if the record was created or not
-      (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
+      # With the signals implementation we don't need to worry here about creating a customer
+      customer_id = Customer.objects.only('id').get(user_id=user.id)
       # Otherwise we want to apply a filter and retrieve orders for a specific customer
       return Order.objects.filter(customer_id=customer_id)

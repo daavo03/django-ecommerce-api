@@ -243,7 +243,7 @@ class CreateOrderSerializer(serializers.Serializer):
         # For the user ID we don't have access to request obj bc it's a serializer so we have2g to view set 
         #and using context object pass the user id here
         # Getting the customer object
-        (customer, created) = Customer.objects.get_or_create(user_id=self.context['user_id'])
+        customer = Customer.objects.get(user_id=self.context['user_id'])
 
         # With these 2 IDs we can create an order object which we only need pass the customer
         order = Order.objects.create(customer=customer)

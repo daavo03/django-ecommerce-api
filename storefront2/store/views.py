@@ -384,15 +384,28 @@ class OrderViewSet(ModelViewSet):
   # Applying Permission classes to secure our endpoint
   permission_classes = [IsAuthenticated]
 
+  # The create method of the ModelViewSet takes the serializer which has only 1 field "cartID" that's why what we 
+  #send to the server it's what we get back. To get back an order object we need to create a diff serializer and then
+  #overwrite the create method where we will use 2 diff serializers: 1) one for deserialize the data and get the cartID
+  #2) return the order back to the client 
+  def create(self, request, *args, **kwargs): 
+      # When creating the serializer we need to give it the context object so we have access to the user ID
+      serializer = CreateOrderSerializer(
+        data=request.data,
+        # Overwriting the context to pass the user id, the other implementation was only useful if we want to rely
+        #on the create model mixin that we inherit from this class
+        context={'user_id': self.request.user.id})
+      serializer.is_valid(raise_exception=True)
+      order = serializer.save()
+      # Creating another serializer resetting it to our OrderSerializer and give it our order obj
+      serializer = OrderSerializer(order)
+      return Response(serializer.data)
+
   # Using the Create Order Serializer in this view set overwriting the default serializer
   def get_serializer_class(self):
       if self.request.method == 'POST':
         return CreateOrderSerializer
       return OrderSerializer
-
-  # Overwriting the context to pass the user id
-  def get_serializer_context(self):
-      return {'user_id': self.request.user.id}
 
   # If not Admin only seeing it's own orders. So overwriting the queryset
   def get_queryset(self):

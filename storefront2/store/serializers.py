@@ -206,6 +206,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
     # We're not including order here bc we're gonna use this serializer inside our Order Serializer
     fields = ['id', 'product', 'unit_price', 'quantity']
 
+# Custom serializer for updating an order
+class UpdateOrderSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Order
+    fields = ['payment_status']
+
 
 # Serializer for the Orders
 class OrderSerializer(serializers.ModelSerializer):

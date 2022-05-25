@@ -16,7 +16,7 @@ from .permissions import FullDJangoModelPermissions, IsAdminOrReadOnly, ViewCust
 from .pagination import DefaultPagination
 from .filters import ProductFilter
 from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 
 """ 
 # Passing an array of strings that specify the HTTP methods we support at this method
@@ -411,6 +411,8 @@ class OrderViewSet(ModelViewSet):
   def get_serializer_class(self):
       if self.request.method == 'POST':
         return CreateOrderSerializer
+      elif self.request.method == 'PATCH':
+        return UpdateOrderSerializer
       return OrderSerializer
 
   # If not Admin only seeing it's own orders. So overwriting the queryset

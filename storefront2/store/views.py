@@ -381,8 +381,14 @@ class CustomerViewSet(ModelViewSet):
 
 # View Set for the Orders
 class OrderViewSet(ModelViewSet):
+  # Restricting the HTTP methods
+  http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+
   # Applying Permission classes to secure our endpoint
-  permission_classes = [IsAuthenticated]
+  def get_permissions(self):
+      if self.request.method in ['PATCH', 'DELETE']:
+        return [IsAdminUser()]
+      return [IsAuthenticated()]
 
   # The create method of the ModelViewSet takes the serializer which has only 1 field "cartID" that's why what we 
   #send to the server it's what we get back. To get back an order object we need to create a diff serializer and then

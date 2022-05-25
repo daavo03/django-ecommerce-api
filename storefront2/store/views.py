@@ -380,7 +380,7 @@ class CustomerViewSet(ModelViewSet):
 # View Set for the Orders
 class OrderViewSet(ModelViewSet):
   # Restricting the HTTP methods
-  http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+  http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
   # Applying Permission classes to secure our endpoint
   def get_permissions(self):

@@ -8,4 +8,4 @@ class StoreConfig(AppConfig):
     # The code for the signal it's not executed unless we import it. So we overwrite the ready() method this method is 
     #called when this app is ready is initialized
     def ready(self) -> None:
-        import store.signals
+        import store.signals.handlers

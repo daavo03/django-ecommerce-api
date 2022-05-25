@@ -3,6 +3,7 @@
 from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
+from .signals import order_created
 from .models import CartItem, Customer, Order, OrderItem, Product, Collection, Review, Cart
 
 # Including a Nested Object. First we need to create a class
@@ -269,6 +270,12 @@ class CreateOrderSerializer(serializers.Serializer):
 
         # Deleting the shopping cart
         Cart.objects.filter(pk=cart_id).delete()
+
+        # Fire a signal when an order is created, with send if one of the receivers fails and throws an exception 
+        #the other receivers are not notified
+        #the sender is the class that is sending the signal, we can supply additional data with the signal like the order that
+        #was created
+        order_created.send_robust(self.__class__, order=order)
 
         # Returning the order object
         return order

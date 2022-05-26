@@ -19,6 +19,20 @@ class InventoryFilter(admin.SimpleListFilter):
         if self.value() == '<10':
             return queryset.filter(inventory__lt=10)
 
+# Defining inline class for managing images from admin panel
+class ProductImageInline(admin.TabularInline):
+    model = models.ProductImage
+    # To see a thumbnail of each image
+    readonly_fields= ['thumbnail']
+
+    # Bc 'thumbnail' it's not a field of ProductImage class we define it here as a method
+    #takes 2 parameters 1) self: this is a method of this class 2) instance: an instance of the ProductImage class
+    def thumbnail(self, instance):
+        # Counting the number of image the product have if it's not empty
+        if instance.image.name != '':
+            # Taking the product image and convert it to html image
+            return format_html(f'<img src="{instance.image.url}" class="thumbnail" />')
+        return ''
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -27,6 +41,8 @@ class ProductAdmin(admin.ModelAdmin):
         'slug': ['title']
     }
     actions = ['clear_inventory']
+    # Registering the inline class in our Products
+    inlines = [ProductImageInline]
     list_display = ['title', 'unit_price',
                     'inventory_status', 'collection_title']
     list_editable = ['unit_price']
@@ -52,6 +68,13 @@ class ProductAdmin(admin.ModelAdmin):
             f'{updated_count} products were successfully updated.',
             messages.ERROR
         )
+
+    # Defining an inner class for Django to read the css
+    class Media:
+        # We can specify the static assets that should be loaded in the Product Admin page
+        css = {
+            'all': ['store/styles.css']
+        }
 
 
 @admin.register(models.Collection)

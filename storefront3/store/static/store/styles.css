@@ -1,0 +1,9 @@
+/* Static special folder for django when our project starts Django Web Server goes through every installed APP and collect
+all static files from this folder. Here we'll add the styles it's a static asset (also could be images, js files) it's part 
+of our project*/
+
+.thumbnail {
+	width: 100px;
+	height: 100px;
+	object-fit: cover;
+}

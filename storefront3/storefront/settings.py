@@ -187,3 +187,8 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 2525
 DEFAULT_FROM_EMAIL = 'from@daavo.com'
+
+# Defining the site admins
+ADMINS = [
+    ('Daavo', 'admin@daavo.com')
+]

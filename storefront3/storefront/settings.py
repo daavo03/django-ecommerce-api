@@ -192,3 +192,5 @@ DEFAULT_FROM_EMAIL = 'from@daavo.com'
 ADMINS = [
     ('Daavo', 'admin@daavo.com')
 ]
+
+CELERY_BROKER_URL = 'redis://localhost:6379/1'
